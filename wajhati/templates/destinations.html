@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Destinations</h1>
+<form method="get" class="form-inline">
+  <input type="text" name="city" value="{{ city }}" placeholder="City">
+  <input type="text" name="category" value="{{ category }}" placeholder="Category">
+  <button class="btn" type="submit">Filter</button>
+</form>
+
+<div class="grid">
+  {% for destination in destinations %}
+    <article class="card">
+      <h3>{{ destination.name }}</h3>
+      <p>{{ destination.city }} | {{ destination.category }}</p>
+      <p>Approx. {{ destination.estimated_cost }} SAR</p>
+      <a href="{{ url_for('main.destination_detail', destination_id=destination.id) }}">Details</a>
+    </article>
+  {% else %}
+    <p>No results found.</p>
+  {% endfor %}
+</div>
+{% endblock %}

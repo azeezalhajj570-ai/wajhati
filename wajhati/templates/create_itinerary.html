@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Create Itinerary</h1>
+<form method="post" class="form">
+  <label>Destination City</label>
+  <input type="text" name="destination_city" placeholder="Riyadh" required>
+
+  <label>Trip Duration (days)</label>
+  <input type="number" name="duration_days" min="1" max="14" value="3" required>
+
+  <label>Budget (SAR)</label>
+  <input type="number" name="budget" min="0" step="0.01" value="1500" required>
+
+  <label>Trip Type</label>
+  <select name="trip_type">
+    <option value="family">Family</option>
+    <option value="adventure">Adventure</option>
+    <option value="cultural">Cultural</option>
+    <option value="leisure" selected>Leisure</option>
+    <option value="business">Business</option>
+  </select>
+
+  <label>Interests (comma-separated)</label>
+  <input type="text" name="interests" placeholder="culture, nature, shopping">
+
+  <button class="btn" type="submit">Generate</button>
+</form>
+{% endblock %}

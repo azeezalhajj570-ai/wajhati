@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Smart Tourism Planner for Saudi Arabia</h1>
+  <p>Plan domestic trips with personalized recommendations, budgets, and day-by-day itineraries.</p>
+  <a class="btn" href="{{ url_for('main.create_itinerary') }}">Start Planning</a>
+</section>
+
+<h2>Featured Destinations</h2>
+<div class="grid">
+  {% for destination in destinations %}
+    <article class="card">
+      <h3>{{ destination.name }}</h3>
+      <p>{{ destination.city }} | {{ destination.category }}</p>
+      <p>{{ destination.description[:120] }}...</p>
+      <a href="{{ url_for('main.destination_detail', destination_id=destination.id) }}">View</a>
+    </article>
+  {% else %}
+    <p>No destinations yet. Run the seed script to add sample data.</p>
+  {% endfor %}
+</div>
+{% endblock %}

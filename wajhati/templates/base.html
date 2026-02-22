@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wajhati Saudiya</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <header class="nav">
+      <div class="container nav-inner">
+        <a href="{{ url_for('main.index') }}" class="brand">Wajhati Saudiya</a>
+        <nav>
+          <a href="{{ url_for('main.destinations') }}">Destinations</a>
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('main.create_itinerary') }}">New Itinerary</a>
+            <a href="{{ url_for('main.my_itineraries') }}">My Itineraries</a>
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}">Login</a>
+            <a href="{{ url_for('auth.register') }}">Register</a>
+          {% endif %}
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>

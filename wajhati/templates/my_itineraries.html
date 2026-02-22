@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>My Itineraries</h1>
+<div class="grid">
+  {% for itinerary in itineraries %}
+    <article class="card">
+      <h3>{{ itinerary.destination_city }} ({{ itinerary.duration_days }} days)</h3>
+      <p>{{ itinerary.trip_type }} | {{ itinerary.created_at.strftime("%Y-%m-%d") }}</p>
+      <p>{{ itinerary.estimated_total_cost }} SAR</p>
+      <a href="{{ url_for('main.itinerary_detail', itinerary_id=itinerary.id) }}">Open</a>
+    </article>
+  {% else %}
+    <p>No itineraries yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

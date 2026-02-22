@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Itinerary #{{ itinerary.id }}</h1>
+<p>{{ itinerary.destination_city }} | {{ itinerary.duration_days }} days | {{ itinerary.trip_type }}</p>
+<p>Budget: {{ itinerary.budget }} SAR | Estimated cost: {{ itinerary.estimated_total_cost }} SAR</p>
+
+{% set ns = namespace(day=0) %}
+{% for item in items %}
+  {% if item.day_number != ns.day %}
+    {% set ns.day = item.day_number %}
+    <h2>Day {{ item.day_number }}</h2>
+  {% endif %}
+  <article class="card">
+    <h3>{{ item.title }}</h3>
+    <p>{{ item.notes }}</p>
+    <p>Estimated cost: {{ item.estimated_cost }} SAR</p>
+  </article>
+{% else %}
+  <p>No itinerary items generated.</p>
+{% endfor %}
+{% endblock %}

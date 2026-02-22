@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ destination.name }}</h1>
+<p>{{ destination.city }} | {{ destination.category }} | {{ destination.season or "All seasons" }}</p>
+<p>{{ destination.description }}</p>
+<p>Estimated cost: {{ destination.estimated_cost }} SAR</p>
+
+{% if current_user.is_authenticated %}
+  <form method="post" action="{{ url_for('main.toggle_favorite', destination_id=destination.id) }}">
+    <button class="btn" type="submit">
+      {% if is_favorite %}Remove Favorite{% else %}Add Favorite{% endif %}
+    </button>
+  </form>
+{% endif %}
+
+<h2>Reviews</h2>
+{% for review in reviews %}
+  <article class="review">
+    <strong>{{ review.user.name }}</strong> - {{ review.rating }}/5
+    <p>{{ review.comment }}</p>
+  </article>
+{% else %}
+  <p>No reviews yet.</p>
+{% endfor %}
+
+<h3>Add Review</h3>
+<form method="post" class="form">
+  <label>Rating (1-5)</label>
+  <input type="number" min="1" max="5" name="rating" required>
+  <label>Comment</label>
+  <textarea name="comment" rows="4" required></textarea>
+  <button class="btn" type="submit">Submit</button>
+</form>
+{% endblock %}
