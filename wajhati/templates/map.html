@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% from "components/_i18n.html" import t %}
+{% block content %}
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+  crossorigin=""
+>
+
+<section class="mx-auto grid min-h-[calc(100vh-80px)] w-full max-w-7xl grid-cols-1 gap-6 px-6 py-8 xl:grid-cols-[360px_minmax(0,1fr)]">
+  <aside class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div class="border-b border-slate-200 p-6 dark:border-slate-800">
+      <p class="mb-2 text-xs font-bold uppercase tracking-widest text-primary">{{ t("خريطة تفاعلية", "Interactive Map", ui_lang) }}</p>
+      <h1 class="text-3xl font-black">{{ t("استكشف الوجهات على الخريطة", "Explore Destinations on the Map", ui_lang) }}</h1>
+      <p class="mt-2 text-sm text-slate-500">{{ t("اختر مدينة واعرض المواقع الحقيقية للوجهات المخزنة في قاعدة البيانات.", "Choose a city and browse the real destination coordinates stored in the database.", ui_lang) }}</p>
+    </div>
+
+    <form method="get" class="border-b border-slate-200 p-6 dark:border-slate-800">
+      <input type="hidden" name="lang" value="{{ ui_lang }}">
+      <label for="city" class="mb-2 block text-sm font-bold">{{ t("المدينة", "City", ui_lang) }}</label>
+      <select id="city" name="city" class="h-12 w-full rounded-xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800">
+        <option value="">{{ t("جميع المدن", "All cities", ui_lang) }}</option>
+        {% for city_option in cities %}
+          <option value="{{ city_option }}" {% if city == city_option %}selected{% endif %}>{{ city_option }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="mt-4 w-full rounded-xl bg-primary py-3 font-bold text-white hover:bg-primary/90">{{ t("تحديث الخريطة", "Update Map", ui_lang) }}</button>
+    </form>
+
+    <div class="flex items-center justify-between px-6 py-4 text-sm text-slate-500">
+      <span>{{ t("عدد الوجهات", "Destinations", ui_lang) }}</span>
+      <strong class="text-slate-900 dark:text-slate-100">{{ map_destinations|length }}</strong>
+    </div>
+
+    <div class="max-h-[55vh] space-y-3 overflow-y-auto px-4 pb-4">
+      {% if map_destinations %}
+        {% for destination in map_destinations %}
+          <article
+            class="map-card rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:border-primary/40 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60"
+            data-lat="{{ destination.latitude }}"
+            data-lng="{{ destination.longitude }}"
+            data-destination-id="{{ destination.id }}">
+            <div class="mb-2 flex items-center justify-between gap-3">
+              <h2 class="font-bold">{{ destination.name }}</h2>
+              <span class="rounded-full bg-primary/10 px-2 py-1 text-xs font-bold text-primary">{{ destination.category }}</span>
+            </div>
+            <p class="mb-2 text-sm text-slate-500">{{ destination.city }}{% if destination.season %} | {{ destination.season }}{% endif %}</p>
+            <p class="line-clamp-3 text-sm text-slate-600 dark:text-slate-300">{{ destination.description }}</p>
+            <div class="mt-3 flex items-center justify-between">
+              <span class="text-sm font-bold text-primary">{{ destination.estimated_cost }} SAR</span>
+              <a href="{{ destination.detail_url }}" class="text-sm font-bold text-slate-700 hover:text-primary dark:text-slate-200">{{ t("عرض التفاصيل", "View Details", ui_lang) }}</a>
+            </div>
+          </article>
+        {% endfor %}
+      {% else %}
+        <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-slate-500 dark:border-slate-700 dark:bg-slate-800/40">
+          {{ t("لا توجد وجهات بإحداثيات متاحة لهذه المدينة.", "No destinations with coordinates are available for this city.", ui_lang) }}
+        </div>
+      {% endif %}
+    </div>
+  </aside>
+
+  <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div class="border-b border-slate-200 px-6 py-4 dark:border-slate-800">
+      <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 class="text-xl font-bold">{{ t("خريطة الوجهات", "Destination Map", ui_lang) }}</h2>
+          <p class="text-sm text-slate-500">{{ t("انقر على أي بطاقة أو علامة لعرض تفاصيل الوجهة.", "Click any card or marker to inspect destination details.", ui_lang) }}</p>
+        </div>
+        <div class="rounded-full bg-primary/10 px-4 py-2 text-sm font-bold text-primary">
+          {{ city or t("جميع المدن", "All cities", ui_lang) }}
+        </div>
+      </div>
+    </div>
+    <div id="destination-map" class="h-[70vh] w-full"></div>
+  </section>
+</section>
+
+<script
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+  crossorigin=""
+></script>
+<script>
+  (() => {
+    const destinations = {{ map_destinations|tojson }};
+    const mapElement = document.getElementById("destination-map");
+    if (!mapElement) return;
+
+    const defaultCenter = [23.8859, 45.0792];
+    const map = L.map(mapElement, { scrollWheelZoom: true }).setView(defaultCenter, 6);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 18,
+      attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
+
+    const icon = L.divIcon({
+      className: "custom-map-marker",
+      html: '<div style="background:#ec5b13;color:white;width:18px;height:18px;border-radius:9999px;border:3px solid white;box-shadow:0 6px 16px rgba(0,0,0,.18);"></div>',
+      iconSize: [18, 18],
+      iconAnchor: [9, 9],
+    });
+
+    const markers = new Map();
+    const bounds = [];
+
+    destinations.forEach((destination) => {
+      if (destination.latitude == null || destination.longitude == null) return;
+
+      const marker = L.marker([destination.latitude, destination.longitude], { icon }).addTo(map);
+      marker.bindPopup(`
+        <div style="min-width:220px">
+          <strong>${destination.name}</strong><br>
+          <span>${destination.city} - ${destination.category}</span><br>
+          <span>${destination.estimated_cost} SAR</span><br>
+          <a href="${destination.detail_url}" style="color:#ec5b13;font-weight:700">View details</a>
+        </div>
+      `);
+      markers.set(String(destination.id), marker);
+      bounds.push([destination.latitude, destination.longitude]);
+    });
+
+    if (bounds.length) {
+      map.fitBounds(bounds, { padding: [40, 40] });
+    }
+
+    document.querySelectorAll(".map-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        const marker = markers.get(card.dataset.destinationId);
+        if (!marker) return;
+        map.flyTo(marker.getLatLng(), Math.max(map.getZoom(), 10), { duration: 0.8 });
+        marker.openPopup();
+      });
+    });
+  })();
+</script>
+{% endblock %}

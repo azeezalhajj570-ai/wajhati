@@ -2,13 +2,16 @@ from collections import defaultdict
 
 
 def match_destinations(destinations, city, budget, interests):
+    normalized_city = city.strip().lower()
     normalized_interests = {item.strip().lower() for item in interests if item.strip()}
     matched = []
 
     for destination in destinations:
+        if destination.city.lower() != normalized_city:
+            continue
+
         score = 0
-        if destination.city.lower() == city.lower():
-            score += 3
+        score += 3
         if destination.estimated_cost <= budget:
             score += 2
         if destination.category.lower() in normalized_interests:
