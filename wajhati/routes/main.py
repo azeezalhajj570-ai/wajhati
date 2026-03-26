@@ -4,7 +4,7 @@ from flask import Blueprint, abort, flash, redirect, render_template, request, u
 from flask_login import current_user, login_required
 
 from wajhati import db
-from wajhati.models import Destination, Favorite, Itinerary, ItineraryItem, Review
+from wajhati.models import Attraction, Destination, Favorite, Itinerary, ItineraryItem, Review, User
 from wajhati.services.recommender import generate_itinerary, match_destinations
 from wajhati.translations import SAUDI_CITIES, tr_category, tr_city, tr_destination, tr_season
 
@@ -146,6 +146,20 @@ def _build_destination_form_data(form=None):
     }
 
 
+def _build_attraction_form_data(form=None):
+    form = form or {}
+    return {
+        "destination_id": str(form.get("destination_id", "")).strip(),
+        "name": str(form.get("name", "")).strip(),
+        "category": str(form.get("category", "")).strip().lower(),
+        "description": str(form.get("description", "")).strip(),
+        "entry_cost": str(form.get("entry_cost", "")).strip(),
+        "duration_hours": str(form.get("duration_hours", "")).strip(),
+        "latitude": str(form.get("latitude", "")).strip(),
+        "longitude": str(form.get("longitude", "")).strip(),
+    }
+
+
 def _validate_destination_form(form_data, available_cities):
     errors = []
 
@@ -200,6 +214,62 @@ def _validate_destination_form(form_data, available_cities):
         "latitude": latitude,
         "longitude": longitude,
         "season": season,
+        "errors": errors,
+    }
+
+
+def _validate_attraction_form(form_data, destinations):
+    errors = []
+    destination_ids = {str(destination.id): destination for destination in destinations}
+
+    if form_data["destination_id"] not in destination_ids:
+        errors.append(("يرجى اختيار وجهة صالحة.", "Please choose a valid destination."))
+    if not form_data["name"]:
+        errors.append(("يرجى إدخال اسم النشاط أو المعلم.", "Please enter an attraction name."))
+    if not form_data["category"]:
+        errors.append(("يرجى إدخال فئة النشاط.", "Please enter an attraction category."))
+    if not form_data["description"]:
+        errors.append(("يرجى إدخال وصف النشاط.", "Please enter an attraction description."))
+
+    try:
+        entry_cost = float(form_data["entry_cost"] or 0)
+        if entry_cost < 0:
+            errors.append(("يجب أن تكون تكلفة الدخول 0 أو أكثر.", "Entry cost must be 0 or greater."))
+    except ValueError:
+        entry_cost = 0.0
+        errors.append(("يرجى إدخال تكلفة دخول صالحة.", "Please enter a valid entry cost."))
+
+    try:
+        duration_hours = float(form_data["duration_hours"] or 2)
+        if duration_hours <= 0:
+            errors.append(("يجب أن تكون مدة النشاط أكبر من 0.", "Duration must be greater than 0."))
+    except ValueError:
+        duration_hours = 2.0
+        errors.append(("يرجى إدخال مدة صالحة.", "Please enter a valid duration."))
+
+    latitude = None
+    if form_data["latitude"]:
+        try:
+            latitude = float(form_data["latitude"])
+        except ValueError:
+            errors.append(("يرجى إدخال خط عرض صالح.", "Please enter a valid latitude."))
+
+    longitude = None
+    if form_data["longitude"]:
+        try:
+            longitude = float(form_data["longitude"])
+        except ValueError:
+            errors.append(("يرجى إدخال خط طول صالح.", "Please enter a valid longitude."))
+
+    return {
+        "destination_id": int(form_data["destination_id"]) if form_data["destination_id"] in destination_ids else None,
+        "name": form_data["name"],
+        "category": form_data["category"],
+        "description": form_data["description"],
+        "entry_cost": entry_cost,
+        "duration_hours": duration_hours,
+        "latitude": latitude,
+        "longitude": longitude,
         "errors": errors,
     }
 
@@ -327,7 +397,78 @@ def admin_destinations():
         form_data=form_data,
         cities=cities,
         seasons=DESTINATION_SEASONS,
+        dashboard_stats={
+            "destinations": Destination.query.count(),
+            "attractions": Attraction.query.count(),
+            "users": User.query.count(),
+            "reviews": Review.query.count(),
+        },
     )
+
+
+@main_bp.route("/admin", methods=["GET"])
+@login_required
+def admin_dashboard():
+    _require_admin()
+    lang = _get_ui_lang()
+    return render_template(
+        "admin_dashboard.html",
+        dashboard_stats={
+            "destinations": Destination.query.count(),
+            "attractions": Attraction.query.count(),
+            "users": User.query.count(),
+            "reviews": Review.query.count(),
+            "itineraries": Itinerary.query.count(),
+        },
+        latest_destinations=Destination.query.order_by(Destination.created_at.desc()).limit(5).all(),
+        latest_attractions=Attraction.query.order_by(Attraction.id.desc()).limit(5).all(),
+        latest_users=User.query.order_by(User.created_at.desc()).limit(5).all(),
+    )
+
+
+@main_bp.route("/admin/attractions", methods=["GET", "POST"])
+@login_required
+def admin_attractions():
+    _require_admin()
+    lang = _get_ui_lang()
+    destinations = Destination.query.order_by(Destination.name.asc()).all()
+    form_data = _build_attraction_form_data(request.form if request.method == "POST" else None)
+
+    if request.method == "POST":
+        parsed = _validate_attraction_form(form_data, destinations)
+        for error in parsed["errors"]:
+            flash(_ui_text(error[0], error[1], lang), "danger")
+        if not parsed["errors"]:
+            attraction = Attraction(
+                destination_id=parsed["destination_id"],
+                name=parsed["name"],
+                category=parsed["category"],
+                description=parsed["description"],
+                entry_cost=parsed["entry_cost"],
+                duration_hours=parsed["duration_hours"],
+                latitude=parsed["latitude"],
+                longitude=parsed["longitude"],
+            )
+            db.session.add(attraction)
+            db.session.commit()
+            flash(_ui_text("تمت إضافة النشاط بنجاح.", "Attraction added successfully.", lang), "success")
+            return redirect(url_for("main.admin_attractions", lang=lang))
+
+    attractions = Attraction.query.order_by(Attraction.id.desc()).all()
+    return render_template(
+        "admin_attractions.html",
+        attractions=attractions,
+        destinations=destinations,
+        form_data=form_data,
+    )
+
+
+@main_bp.route("/admin/users", methods=["GET"])
+@login_required
+def admin_users():
+    _require_admin()
+    users = User.query.order_by(User.created_at.desc()).all()
+    return render_template("admin_users.html", users=users)
 
 
 @main_bp.route("/")

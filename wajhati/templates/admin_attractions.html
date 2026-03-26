@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% from "components/_i18n.html" import t %}
+{% block content %}
+<section class="mx-auto w-full max-w-7xl px-6 py-10">
+  <div class="mb-10 rounded-3xl bg-slate-900 p-8 text-white">
+    <p class="mb-2 text-xs font-bold uppercase tracking-widest text-primary">{{ t("لوحة الإدارة", "Admin Dashboard", ui_lang) }}</p>
+    <h1 class="text-4xl font-black">{{ t("إدارة الأنشطة", "Manage Attractions", ui_lang) }}</h1>
+    <p class="mt-3 max-w-3xl text-slate-200">{{ t("أضف المعالم والأنشطة التابعة لكل وجهة.", "Add attractions and activities attached to each destination.", ui_lang) }}</p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-8 xl:grid-cols-[420px_minmax(0,1fr)]">
+    <section class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <h2 class="mb-6 text-2xl font-bold">{{ t("إضافة نشاط", "Add Attraction", ui_lang) }}</h2>
+      <form method="post" class="space-y-5">
+        <input type="hidden" name="lang" value="{{ ui_lang }}">
+        <div>
+          <label for="destination_id" class="mb-2 block text-sm font-bold">{{ t("الوجهة", "Destination", ui_lang) }}</label>
+          <select id="destination_id" name="destination_id" data-searchable-select data-search-placeholder="{{ t('ابحث عن وجهة', 'Search destination', ui_lang) }}" data-empty-label="{{ t('لا توجد نتائج', 'No matches found', ui_lang) }}" class="h-12 w-full rounded-xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800" required>
+            <option value="">{{ t("اختر وجهة", "Select destination", ui_lang) }}</option>
+            {% for destination in destinations %}
+              <option value="{{ destination.id }}" {% if form_data.destination_id == destination.id|string %}selected{% endif %}>{{ tr_destination(destination.name, ui_lang) or destination.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label for="name" class="mb-2 block text-sm font-bold">{{ t("اسم النشاط", "Attraction Name", ui_lang) }}</label>
+          <input id="name" name="name" value="{{ form_data.name }}" class="h-12 w-full rounded-xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800" required>
+        </div>
+        <div>
+          <label for="category" class="mb-2 block text-sm font-bold">{{ t("الفئة", "Category", ui_lang) }}</label>
+          <input id="category" name="category" value="{{ form_data.category }}" class="h-12 w-full rounded-xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800" required>
+        </div>
+        <div>
+          <label for="description" class="mb-2 block text-sm font-bold">{{ t("الوصف", "Description", ui_lang) }}</label>
+          <textarea id="description" name="description" rows="4" class="w-full rounded-xl border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800" required>{{ form_data.description }}</textarea>
+        </div>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label for="entry_cost" class="mb-2 block text-sm font-bold">{{ t("سعر الدخول", "Entry Cost", ui_lang) }}</label>
+            <input id="entry_cost" name="entry_cost" type="number" step="0.01" min="0" value="{{ form_data.entry_cost }}" class="h-12 w-full rounded-xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800">
+          </div>
+          <div>
+            <label for="duration_hours" class="mb-2 block text-sm font-bold">{{ t("المدة بالساعات", "Duration Hours", ui_lang) }}</label>
+            <input id="duration_hours" name="duration_hours" type="number" step="0.5" min="0.5" value="{{ form_data.duration_hours or '2' }}" class="h-12 w-full rounded-xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label for="latitude" class="mb-2 block text-sm font-bold">{{ t("خط العرض", "Latitude", ui_lang) }}</label>
+            <input id="latitude" name="latitude" type="number" step="any" value="{{ form_data.latitude }}" class="h-12 w-full rounded-xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800">
+          </div>
+          <div>
+            <label for="longitude" class="mb-2 block text-sm font-bold">{{ t("خط الطول", "Longitude", ui_lang) }}</label>
+            <input id="longitude" name="longitude" type="number" step="any" value="{{ form_data.longitude }}" class="h-12 w-full rounded-xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800">
+          </div>
+        </div>
+        <button type="submit" class="w-full rounded-2xl bg-primary py-4 text-lg font-bold text-white hover:bg-primary/90">{{ t("إضافة النشاط", "Add Attraction", ui_lang) }}</button>
+      </form>
+    </section>
+
+    <section class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div class="mb-6 flex items-center justify-between">
+        <h2 class="text-2xl font-bold">{{ t("الأنشطة الحالية", "Current Attractions", ui_lang) }}</h2>
+        <span class="rounded-full bg-primary/10 px-4 py-2 text-sm font-bold text-primary">{{ attractions|length }}</span>
+      </div>
+      <div class="space-y-4">
+        {% for attraction in attractions %}
+          <article class="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-800/60">
+            <h3 class="text-lg font-bold">{{ attraction.name }}</h3>
+            <p class="text-sm text-slate-500">{{ attraction.destination.name }} | {{ attraction.category }}</p>
+            <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">{{ attraction.description }}</p>
+          </article>
+        {% else %}
+          <div class="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-slate-500 dark:border-slate-700">
+            {{ t("لا توجد أنشطة حتى الآن.", "No attractions yet.", ui_lang) }}
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</section>
+{% endblock %}
