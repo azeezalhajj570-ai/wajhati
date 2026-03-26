@@ -1,34 +1,96 @@
 {% extends "base.html" %}
+{% from "components/_i18n.html" import t %}
+{% from "components/_media.html" import destination_image %}
 {% block content %}
-<h1>{{ destination.name }}</h1>
-<p>{{ destination.city }} | {{ destination.category }} | {{ destination.season or "All seasons" }}</p>
-<p>{{ destination.description }}</p>
-<p>Estimated cost: {{ destination.estimated_cost }} SAR</p>
+<section class="mx-auto w-full max-w-7xl px-6 py-8">
+  <section class="relative mb-10 overflow-hidden rounded-3xl bg-slate-900 p-8">
+    <div class="absolute inset-0 opacity-60">
+      <img class="h-full w-full object-cover" src="{{ destination_image(destination) }}" alt="{{ destination.name }}">
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-t from-background-dark/90 via-background-dark/35 to-transparent"></div>
+    <div class="relative z-10 max-w-3xl">
+      <p class="mb-3 inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white">{{ destination.category }}</p>
+      <h1 class="mb-3 text-4xl font-black text-white">{{ destination.name }}</h1>
+      <p class="text-slate-200">{{ destination.city }} | {{ destination.season or t("كل المواسم", "All seasons", ui_lang) }}</p>
+      <div class="mt-5 flex flex-wrap gap-2">
+        <span class="rounded-full bg-primary/20 px-3 py-1 text-xs font-bold text-white">{{ t("التكلفة التقديرية", "Estimated Cost", ui_lang) }}: {{ destination.estimated_cost }} SAR</span>
+      </div>
+    </div>
+  </section>
 
-{% if current_user.is_authenticated %}
-  <form method="post" action="{{ url_for('main.toggle_favorite', destination_id=destination.id) }}">
-    <button class="btn" type="submit">
-      {% if is_favorite %}Remove Favorite{% else %}Add Favorite{% endif %}
-    </button>
-  </form>
-{% endif %}
+  <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
+    <section class="space-y-8 lg:col-span-8">
+      <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800/50">
+        <h2 class="mb-4 text-2xl font-bold">{{ t("نبذة عن الوجهة", "About Destination", ui_lang) }}</h2>
+        <p class="leading-7 text-slate-600 dark:text-slate-300">{{ destination.description }}</p>
+      </article>
 
-<h2>Reviews</h2>
-{% for review in reviews %}
-  <article class="review">
-    <strong>{{ review.user.name }}</strong> - {{ review.rating }}/5
-    <p>{{ review.comment }}</p>
-  </article>
-{% else %}
-  <p>No reviews yet.</p>
-{% endfor %}
+      <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800/50">
+        <div class="mb-5 flex items-center justify-between">
+          <h2 class="text-2xl font-bold">{{ t("التقييمات", "Reviews", ui_lang) }}</h2>
+          <span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">{{ reviews|length }} {{ t("تقييم", "Reviews", ui_lang) }}</span>
+        </div>
 
-<h3>Add Review</h3>
-<form method="post" class="form">
-  <label>Rating (1-5)</label>
-  <input type="number" min="1" max="5" name="rating" required>
-  <label>Comment</label>
-  <textarea name="comment" rows="4" required></textarea>
-  <button class="btn" type="submit">Submit</button>
-</form>
+        {% if reviews %}
+          <div class="space-y-4">
+            {% for review in reviews %}
+              <article class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+                <div class="mb-2 flex items-center justify-between">
+                  <h3 class="font-bold">{{ review.user.name }}</h3>
+                  <span class="text-sm font-bold text-amber-500">★ {{ review.rating }}/5</span>
+                </div>
+                <p class="text-sm text-slate-600 dark:text-slate-300">{{ review.comment }}</p>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-slate-500 dark:border-slate-700 dark:bg-slate-800/40">
+            {{ t("لا توجد تقييمات بعد.", "No reviews yet.", ui_lang) }}
+          </div>
+        {% endif %}
+      </section>
+    </section>
+
+    <aside class="space-y-6 lg:col-span-4">
+      <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800/50">
+        <h3 class="mb-4 text-lg font-bold">{{ t("إجراءات سريعة", "Quick Actions", ui_lang) }}</h3>
+        {% if current_user.is_authenticated %}
+          <form method="post" action="{{ url_for('main.toggle_favorite', destination_id=destination.id, lang=ui_lang) }}" class="mb-3">
+            <input type="hidden" name="lang" value="{{ ui_lang }}">
+            <button class="w-full rounded-xl border border-primary px-4 py-3 text-sm font-bold text-primary hover:bg-primary/5" type="submit">
+              {% if is_favorite %}
+                {{ t("إزالة من المفضلة", "Remove Favorite", ui_lang) }}
+              {% else %}
+                {{ t("إضافة إلى المفضلة", "Add Favorite", ui_lang) }}
+              {% endif %}
+            </button>
+          </form>
+        {% else %}
+          <a href="{{ url_for('auth.login', lang=ui_lang) }}" class="mb-3 block w-full rounded-xl border border-primary px-4 py-3 text-center text-sm font-bold text-primary hover:bg-primary/5">
+            {{ t("سجل الدخول للإضافة للمفضلة", "Login to add favorite", ui_lang) }}
+          </a>
+        {% endif %}
+        <a href="{{ url_for('main.destinations', lang=ui_lang) }}" class="block w-full rounded-xl bg-primary px-4 py-3 text-center text-sm font-bold text-white hover:bg-primary/90">
+          {{ t("العودة إلى الوجهات", "Back to Destinations", ui_lang) }}
+        </a>
+      </section>
+
+      <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800/50">
+        <h3 class="mb-4 text-lg font-bold">{{ t("أضف تقييمك", "Add Your Review", ui_lang) }}</h3>
+        <form method="post" class="space-y-4">
+          <input type="hidden" name="lang" value="{{ ui_lang }}">
+          <div>
+            <label for="rating" class="mb-2 block text-sm font-bold">{{ t("التقييم (1-5)", "Rating (1-5)", ui_lang) }}</label>
+            <input id="rating" type="number" min="1" max="5" name="rating" required class="h-11 w-full rounded-xl border-slate-200 bg-slate-50 px-3 dark:border-slate-700 dark:bg-slate-800">
+          </div>
+          <div>
+            <label for="comment" class="mb-2 block text-sm font-bold">{{ t("التعليق", "Comment", ui_lang) }}</label>
+            <textarea id="comment" name="comment" rows="4" required class="w-full rounded-xl border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800"></textarea>
+          </div>
+          <button class="w-full rounded-xl bg-primary py-3 text-sm font-bold text-white hover:bg-primary/90" type="submit">{{ t("إرسال التقييم", "Submit Review", ui_lang) }}</button>
+        </form>
+      </section>
+    </aside>
+  </div>
+</section>
 {% endblock %}

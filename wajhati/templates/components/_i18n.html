@@ -1,0 +1,3 @@
+{% macro t(ar, en, ui_lang='ar') -%}
+  {{ ar if ui_lang == 'ar' else en }}
+{%- endmacro %}

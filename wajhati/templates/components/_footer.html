@@ -1,0 +1,60 @@
+{% from "components/_i18n.html" import t %}
+<footer class="border-t border-slate-200 bg-white px-6 py-12 dark:border-slate-800 dark:bg-slate-900">
+  <div class="mx-auto w-full max-w-7xl">
+    <div class="mb-10 grid grid-cols-1 gap-10 md:grid-cols-4">
+      <div>
+        <div class="mb-4 flex items-center gap-3">
+          <div class="rounded-lg bg-primary p-2 text-white">
+            <span class="material-symbols-outlined">travel_explore</span>
+          </div>
+          <span class="text-lg font-black">{{ t('وجهتي السعودية', 'Wajhati Saudiya', ui_lang) }}</span>
+        </div>
+        <p class="text-sm leading-relaxed text-slate-500">
+          {{ t("منصتك الذكية لاكتشاف أجمل وجهات المملكة وتخطيط الرحلات.", "Your smart platform to discover Saudi destinations and plan trips.", ui_lang) }}
+        </p>
+      </div>
+
+      <div>
+        <h4 class="mb-4 font-bold">{{ t("روابط سريعة", "Quick Links", ui_lang) }}</h4>
+        <div class="space-y-3 text-sm text-slate-500">
+          <a class="block hover:text-primary" href="{{ url_for('main.index', lang=ui_lang) }}">{{ t("الرئيسية", "Home", ui_lang) }}</a>
+          <a class="block hover:text-primary" href="{{ url_for('main.destinations', lang=ui_lang) }}">{{ t("الوجهات", "Destinations", ui_lang) }}</a>
+          <a class="block hover:text-primary" href="{{ url_for('main.create_itinerary', lang=ui_lang) }}">{{ t("التخطيط", "Planning", ui_lang) }}</a>
+          <a class="block hover:text-primary" href="{{ url_for('main.map_screen', lang=ui_lang) }}">{{ t("الخريطة", "Map", ui_lang) }}</a>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="mb-4 font-bold">{{ t("الحساب", "Account", ui_lang) }}</h4>
+        <div class="space-y-3 text-sm text-slate-500">
+          {% if current_user.is_authenticated %}
+            <a class="block hover:text-primary" href="{{ url_for('main.my_itineraries', lang=ui_lang) }}">{{ t("رحلاتي", "My Itineraries", ui_lang) }}</a>
+            <a class="block hover:text-primary" href="{{ url_for('auth.logout') }}">{{ t("تسجيل الخروج", "Logout", ui_lang) }}</a>
+          {% else %}
+            <a class="block hover:text-primary" href="{{ url_for('auth.login', lang=ui_lang) }}">{{ t("تسجيل الدخول", "Login", ui_lang) }}</a>
+            <a class="block hover:text-primary" href="{{ url_for('auth.register', lang=ui_lang) }}">{{ t("إنشاء حساب", "Register", ui_lang) }}</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div>
+        <h4 class="mb-4 font-bold">{{ t("تابعنا", "Follow Us", ui_lang) }}</h4>
+        <div class="flex gap-3">
+          <span class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800">
+            <span class="material-symbols-outlined">public</span>
+          </span>
+          <span class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800">
+            <span class="material-symbols-outlined">share</span>
+          </span>
+          <span class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800">
+            <span class="material-symbols-outlined">mail</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t border-slate-200 pt-6 text-center text-sm text-slate-400 dark:border-slate-800">
+      © 2026 {{ t('وجهتي السعودية', 'Wajhati Saudiya', ui_lang) }}. {{ t("جميع الحقوق محفوظة.", "All rights reserved.", ui_lang) }}
+    </div>
+  </div>
+</footer>

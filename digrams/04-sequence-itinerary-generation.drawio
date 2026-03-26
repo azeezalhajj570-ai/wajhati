@@ -1,0 +1,159 @@
+<mxfile host="app.diagrams.net" modified="2026-02-25T00:00:00.000Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64)" version="29.5.3" type="device">
+  <diagram name="Sequence Diagram - Itinerary Generation" id="sequence-1">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Lifeline headers -->
+        <mxCell id="10" value="User" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#333333;fontColor=#111111;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="140" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="11" value="Mobile/Web UI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#333333;fontColor=#111111;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="220" y="40" width="170" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="12" value="Backend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#333333;fontColor=#111111;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="430" y="40" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="13" value="Auth Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#333333;fontColor=#111111;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="630" y="40" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="14" value="AI Recommendation Module" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#333333;fontColor=#111111;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="820" y="40" width="230" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="15" value="Destinations DB" style="shape=cylinder;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontColor=#111111;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1090" y="35" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="16" value="Itineraries DB" style="shape=cylinder;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;fontColor=#111111;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1290" y="35" width="170" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="17" value="Maps API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#333333;fontColor=#111111;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1490" y="40" width="100" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Lifeline vertical dashed lines (as vertices, not edges) -->
+        <mxCell id="110" value="" style="shape=line;dashed=1;strokeColor=#666666;html=1;" vertex="1" parent="1">
+          <mxGeometry x="110" y="90" width="1" height="770" as="geometry"/>
+        </mxCell>
+        <mxCell id="111" value="" style="shape=line;dashed=1;strokeColor=#666666;html=1;" vertex="1" parent="1">
+          <mxGeometry x="305" y="90" width="1" height="770" as="geometry"/>
+        </mxCell>
+        <mxCell id="112" value="" style="shape=line;dashed=1;strokeColor=#666666;html=1;" vertex="1" parent="1">
+          <mxGeometry x="510" y="90" width="1" height="770" as="geometry"/>
+        </mxCell>
+        <mxCell id="113" value="" style="shape=line;dashed=1;strokeColor=#666666;html=1;" vertex="1" parent="1">
+          <mxGeometry x="710" y="90" width="1" height="770" as="geometry"/>
+        </mxCell>
+        <mxCell id="114" value="" style="shape=line;dashed=1;strokeColor=#666666;html=1;" vertex="1" parent="1">
+          <mxGeometry x="935" y="90" width="1" height="770" as="geometry"/>
+        </mxCell>
+        <mxCell id="115" value="" style="shape=line;dashed=1;strokeColor=#666666;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1175" y="90" width="1" height="770" as="geometry"/>
+        </mxCell>
+        <mxCell id="116" value="" style="shape=line;dashed=1;strokeColor=#666666;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1375" y="90" width="1" height="770" as="geometry"/>
+        </mxCell>
+        <mxCell id="117" value="" style="shape=line;dashed=1;strokeColor=#666666;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1540" y="90" width="1" height="770" as="geometry"/>
+        </mxCell>
+
+        <!-- Message edges -->
+        <mxCell id="200" value="1) Login / authenticate" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="10" target="11">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="140" as="sourcePoint"/>
+            <mxPoint x="0" y="140" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="201" value="2) Request token (credentials)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="11" target="12">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="190" as="sourcePoint"/>
+            <mxPoint x="0" y="190" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="202" value="3) Verify credentials" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="12" target="13">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="240" as="sourcePoint"/>
+            <mxPoint x="0" y="240" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="203" value="4) JWT / access token" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="13" target="12">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="290" as="sourcePoint"/>
+            <mxPoint x="0" y="290" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="204" value="5) Token to UI" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="12" target="11">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="340" as="sourcePoint"/>
+            <mxPoint x="0" y="340" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="205" value="6) Submit trip preferences" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="11" target="12">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="400" as="sourcePoint"/>
+            <mxPoint x="0" y="400" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="206" value="7) Query destinations/attractions" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="12" target="15">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="460" as="sourcePoint"/>
+            <mxPoint x="0" y="460" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="207" value="8) Candidate attractions + metadata" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="15" target="12">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="510" as="sourcePoint"/>
+            <mxPoint x="0" y="510" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="208" value="9) Request AI plan" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="12" target="14">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="570" as="sourcePoint"/>
+            <mxPoint x="0" y="570" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="209" value="10) Request route estimates (via backend)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="14" target="12">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="620" as="sourcePoint"/>
+            <mxPoint x="0" y="620" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="210" value="11) Call Maps API (matrix/routing)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="12" target="17">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="670" as="sourcePoint"/>
+            <mxPoint x="0" y="670" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="211" value="12) Distances / ETA" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="17" target="12">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="720" as="sourcePoint"/>
+            <mxPoint x="0" y="720" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="212" value="13) Provide route estimates" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="12" target="14">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="770" as="sourcePoint"/>
+            <mxPoint x="0" y="770" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="213" value="14) AI returns itinerary" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="14" target="12">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="820" as="sourcePoint"/>
+            <mxPoint x="0" y="820" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="214" value="15) Store itinerary" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="12" target="16">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="215" value="16) Display itinerary" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="12" target="11">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="216" value="17) Itinerary shown" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;strokeColor=#333333;fontColor=#111111;fontSize=12;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="11" target="10">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

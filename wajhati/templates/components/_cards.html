@@ -1,0 +1,42 @@
+{% from "components/_i18n.html" import t %}
+{% macro destination_card(destination, detail_url, ui_lang='ar') -%}
+  <article class="card">
+    <h3 class="card-title">{{ destination.name }}</h3>
+    <p class="card-meta">{{ destination.city }} | {{ destination.category }}</p>
+    {% if destination.description %}
+      <p>{{ destination.description[:140] }}{% if destination.description|length > 140 %}...{% endif %}</p>
+    {% endif %}
+    {% if destination.estimated_cost is not none %}
+      <span class="badge">{{ destination.estimated_cost }} {{ t('ر.س', 'SAR', ui_lang) }}</span>
+    {% endif %}
+    <div class="card-actions">
+      <a class="btn btn-outline" href="{{ detail_url }}">{{ t('التفاصيل', 'Details', ui_lang) }}</a>
+    </div>
+  </article>
+{%- endmacro %}
+
+{% macro itinerary_card(itinerary, detail_url, ui_lang='ar') -%}
+  <article class="card">
+    <h3 class="card-title">{{ itinerary.destination_city }} ({{ itinerary.duration_days }} {{ t('أيام', 'days', ui_lang) }})</h3>
+    <p class="card-meta">{{ itinerary.trip_type }} | {{ itinerary.created_at.strftime("%Y-%m-%d") }}</p>
+    <p><strong>{{ itinerary.estimated_total_cost }}</strong> {{ t('ر.س', 'SAR', ui_lang) }}</p>
+    <div class="card-actions">
+      <a class="btn btn-outline" href="{{ detail_url }}">{{ t('فتح', 'Open', ui_lang) }}</a>
+    </div>
+  </article>
+{%- endmacro %}
+
+{% macro itinerary_item(item, ui_lang='ar') -%}
+  <article class="card timeline-item">
+    <h3 class="card-title">{{ item.title }}</h3>
+    <p>{{ item.notes }}</p>
+    <p class="card-meta">{{ t('التكلفة التقديرية:', 'Estimated cost:', ui_lang) }} {{ item.estimated_cost }} {{ t('ر.س', 'SAR', ui_lang) }}</p>
+  </article>
+{%- endmacro %}
+
+{% macro review_card(review) -%}
+  <article class="card">
+    <h3 class="card-title">{{ review.user.name }} - {{ review.rating }}/5</h3>
+    <p>{{ review.comment }}</p>
+  </article>
+{%- endmacro %}

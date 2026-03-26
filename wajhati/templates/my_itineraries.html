@@ -1,16 +1,56 @@
 {% extends "base.html" %}
+{% from "components/_i18n.html" import t %}
+{% from "components/_media.html" import city_image %}
 {% block content %}
-<h1>My Itineraries</h1>
-<div class="grid">
-  {% for itinerary in itineraries %}
-    <article class="card">
-      <h3>{{ itinerary.destination_city }} ({{ itinerary.duration_days }} days)</h3>
-      <p>{{ itinerary.trip_type }} | {{ itinerary.created_at.strftime("%Y-%m-%d") }}</p>
-      <p>{{ itinerary.estimated_total_cost }} SAR</p>
-      <a href="{{ url_for('main.itinerary_detail', itinerary_id=itinerary.id) }}">Open</a>
-    </article>
+<section class="mx-auto w-full max-w-7xl px-6 py-8">
+  <section class="relative mb-10 overflow-hidden rounded-3xl bg-slate-900 p-8">
+    <div class="absolute inset-0 opacity-55">
+      <img class="h-full w-full object-cover" src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1400&q=80" alt="My trips">
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-t from-background-dark/85 via-background-dark/25 to-transparent"></div>
+    <div class="relative z-10 max-w-3xl">
+      <h1 class="mb-3 text-4xl font-black text-white">{{ t("رحلاتي", "My Trips", ui_lang) }}</h1>
+      <p class="text-slate-200">{{ t("كل الخطط التي أنشأتها، مع تفاصيل الميزانية والمدة وإمكانية المتابعة.", "All your generated plans with budget, duration, and quick access.", ui_lang) }}</p>
+    </div>
+  </section>
+
+  {% if itineraries %}
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+      {% for itinerary in itineraries %}
+        <article class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-700 dark:bg-slate-800/50">
+          <div class="relative h-44 overflow-hidden">
+            <img class="h-full w-full object-cover transition duration-500 group-hover:scale-105" src="{{ city_image(itinerary.destination_city) }}" alt="{{ itinerary.destination_city }}">
+            <span class="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-primary">{{ itinerary.trip_type }}</span>
+          </div>
+
+          <div class="space-y-3 p-5">
+            <h2 class="text-lg font-bold">{{ itinerary.destination_city }}</h2>
+            <p class="text-sm text-slate-500">{{ itinerary.created_at.strftime("%Y-%m-%d") }}</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">{{ itinerary.duration_days }} {{ t("أيام", "days", ui_lang) }}</span>
+              <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 dark:bg-slate-700 dark:text-slate-200">{{ itinerary.estimated_total_cost }} SAR</span>
+            </div>
+            <div class="flex gap-3">
+              <a href="{{ url_for('main.itinerary_detail', itinerary_id=itinerary.id, lang=ui_lang) }}" class="inline-flex flex-1 items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white hover:bg-primary/90">
+                {{ t("عرض الرحلة", "Open Trip", ui_lang) }}
+              </a>
+              <form method="post" action="{{ url_for('main.delete_itinerary', itinerary_id=itinerary.id, lang=ui_lang) }}" class="flex-1">
+                <button type="submit" class="inline-flex w-full items-center justify-center rounded-xl border border-rose-200 px-4 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 dark:border-rose-900/60 dark:hover:bg-rose-950/30">
+                  {{ t("حذف", "Delete", ui_lang) }}
+                </button>
+              </form>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
   {% else %}
-    <p>No itineraries yet.</p>
-  {% endfor %}
-</div>
+    <div class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center dark:border-slate-700 dark:bg-slate-800/40">
+      <p class="mb-5 text-slate-500">{{ t("لا توجد رحلات بعد. ابدأ بإنشاء خطة جديدة.", "No trips yet. Start by creating a new itinerary.", ui_lang) }}</p>
+      <a href="{{ url_for('main.create_itinerary', lang=ui_lang) }}" class="inline-flex rounded-xl bg-primary px-6 py-3 font-bold text-white hover:bg-primary/90">
+        {{ t("إنشاء رحلة", "Create Trip", ui_lang) }}
+      </a>
+    </div>
+  {% endif %}
+</section>
 {% endblock %}

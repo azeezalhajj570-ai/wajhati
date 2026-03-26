@@ -1,0 +1,53 @@
+{% macro kpi_widget(title, value, note='') -%}
+  <article class="kpi-card">
+    <p class="kpi-title">{{ title }}</p>
+    <p class="kpi-value">{{ value }}</p>
+    {% if note %}
+      <p class="kpi-note">{{ note }}</p>
+    {% endif %}
+  </article>
+{%- endmacro %}
+
+{% macro tabs(group_id, items, active_index=0) -%}
+  <div class="tabs" data-tabs id="{{ group_id }}" role="tablist" aria-label="{{ group_id }}">
+    {% for item in items %}
+      {% set idx = loop.index0 %}
+      <button
+        class="tab-btn {% if idx == active_index %}is-active{% endif %}"
+        role="tab"
+        id="{{ group_id }}-tab-{{ idx }}"
+        aria-controls="{{ group_id }}-panel-{{ idx }}"
+        aria-selected="{{ 'true' if idx == active_index else 'false' }}"
+        type="button">
+        {{ item }}
+      </button>
+    {% endfor %}
+  </div>
+{%- endmacro %}
+
+{% macro map_card(title, text, cta_text, href='#') -%}
+  <article class="map-card">
+    <div class="map-card-overlay">
+      <h3>{{ title }}</h3>
+      <p>{{ text }}</p>
+      <a class="btn btn-primary" href="{{ href }}">{{ cta_text }}</a>
+    </div>
+  </article>
+{%- endmacro %}
+
+{% macro modal(modal_id, title, open_label, close_label='إغلاق') -%}
+  <button class="btn btn-outline" type="button" data-modal-open="{{ modal_id }}">{{ open_label }}</button>
+  <div class="modal-backdrop" id="{{ modal_id }}" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="{{ modal_id }}-title">
+      <header class="modal-header">
+        <h3 id="{{ modal_id }}-title">{{ title }}</h3>
+        <button class="btn btn-outline" type="button" data-modal-close>{{ close_label }}</button>
+      </header>
+      <div class="modal-body">
+        {% if caller %}
+          {{ caller() }}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{%- endmacro %}

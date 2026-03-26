@@ -7,6 +7,14 @@ from wajhati.services.recommender import generate_itinerary, match_destinations
 
 api_bp = Blueprint("api", __name__)
 
+TRIP_TYPES = {"family", "adventure", "cultural", "leisure"}
+
+
+def _parse_interests(raw_value):
+    if isinstance(raw_value, list):
+        return [str(item).strip() for item in raw_value if str(item).strip()]
+    return [item.strip() for item in str(raw_value).split(",") if item.strip()]
+
 
 @api_bp.get("/health")
 def health():
@@ -45,24 +53,35 @@ def get_destinations():
 def api_generate_itinerary():
     payload = request.get_json(silent=True) or {}
     city = str(payload.get("destination_city", "")).strip()
-    duration_days = int(payload.get("duration_days", 1))
-    budget = float(payload.get("budget", 0))
     trip_type = str(payload.get("trip_type", "leisure")).strip().lower()
-    interests = payload.get("interests", [])
-
-    if isinstance(interests, str):
-        interests = [item.strip() for item in interests.split(",") if item.strip()]
+    interests = _parse_interests(payload.get("interests", []))
 
     if not city:
         return jsonify({"error": "destination_city is required"}), 400
-    if duration_days < 1:
-        return jsonify({"error": "duration_days must be >= 1"}), 400
-    if budget < 0:
-        return jsonify({"error": "budget must be >= 0"}), 400
+    try:
+        duration_days = int(payload.get("duration_days", 1))
+    except (TypeError, ValueError):
+        return jsonify({"error": "duration_days must be an integer"}), 400
+    if duration_days < 1 or duration_days > 7:
+        return jsonify({"error": "duration_days must be between 1 and 7"}), 400
+
+    try:
+        budget = float(payload.get("budget", 0))
+    except (TypeError, ValueError):
+        return jsonify({"error": "budget must be a number"}), 400
+    if budget <= 0:
+        return jsonify({"error": "budget must be greater than 0"}), 400
+    if trip_type not in TRIP_TYPES:
+        return jsonify({"error": "trip_type is invalid"}), 400
 
     destinations = Destination.query.all()
     matched = match_destinations(destinations, city=city, budget=budget, interests=interests)
+    if not matched:
+        return jsonify({"error": "No destinations matched the selected preferences"}), 404
+
     generated = generate_itinerary(matched, duration_days, budget, trip_type, interests)
+    if not generated["items"]:
+        return jsonify({"error": "Unable to generate itinerary items"}), 422
 
     response = {
         "destination_city": city,

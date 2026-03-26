@@ -1,21 +1,81 @@
 {% extends "base.html" %}
+{% from "components/_i18n.html" import t %}
+{% from "components/_media.html" import city_image %}
 {% block content %}
-<h1>Itinerary #{{ itinerary.id }}</h1>
-<p>{{ itinerary.destination_city }} | {{ itinerary.duration_days }} days | {{ itinerary.trip_type }}</p>
-<p>Budget: {{ itinerary.budget }} SAR | Estimated cost: {{ itinerary.estimated_total_cost }} SAR</p>
+<section class="mx-auto w-full max-w-5xl px-4 py-8">
+  <div class="mb-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div class="flex flex-col gap-6 p-6 md:flex-row md:items-center">
+      <div class="h-32 w-full rounded-lg bg-cover bg-center md:w-48" style="background-image:url('{{ city_image(itinerary.destination_city) }}');"></div>
+      <div class="flex-1">
+        <p class="mb-1 text-sm font-bold uppercase tracking-wider text-primary">{{ t("خطة مقترحة بالذكاء الاصطناعي", "AI suggested itinerary", ui_lang) }}</p>
+        <h1 class="mb-2 text-2xl font-bold">{{ itinerary.destination_city }} {{ t("رحلة", "Trip", ui_lang) }} #{{ itinerary.id }}</h1>
+        <div class="flex flex-wrap gap-4 text-sm text-slate-500">
+          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">calendar_today</span>{{ itinerary.duration_days }} {{ t("أيام", "days", ui_lang) }}</span>
+          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">payments</span>{{ itinerary.budget }} SAR</span>
+          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">location_on</span>{{ itinerary.destination_city }}</span>
+          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">interests</span>{{ itinerary.interests or t("بدون اهتمامات محددة", "No specific interests", ui_lang) }}</span>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <a href="{{ url_for('main.create_itinerary', lang=ui_lang) }}" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-bold hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800">{{ t("تعديل", "Edit", ui_lang) }}</a>
+        <a href="{{ url_for('main.map_screen', lang=ui_lang) }}" class="rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white hover:opacity-90">{{ t("الخريطة", "Map", ui_lang) }}</a>
+      </div>
+    </div>
+  </div>
 
-{% set ns = namespace(day=0) %}
-{% for item in items %}
-  {% if item.day_number != ns.day %}
-    {% set ns.day = item.day_number %}
-    <h2>Day {{ item.day_number }}</h2>
+  {% if items %}
+    {% set ns = namespace(day=0) %}
+    <div class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-sm text-slate-500">{{ t("إجمالي الأيام", "Total days", ui_lang) }}</p>
+        <p class="mt-2 text-2xl font-black text-primary">{{ itinerary.duration_days }}</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-sm text-slate-500">{{ t("العناصر المجدولة", "Scheduled items", ui_lang) }}</p>
+        <p class="mt-2 text-2xl font-black text-primary">{{ items|length }}</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-4 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <p class="text-sm text-slate-500">{{ t("التكلفة التقديرية", "Estimated total cost", ui_lang) }}</p>
+        <p class="mt-2 text-2xl font-black text-primary">{{ itinerary.estimated_total_cost }} SAR</p>
+      </div>
+    </div>
+
+    <div class="relative space-y-10 border-r-2 border-slate-200 pr-6 dark:border-slate-800">
+      {% for item in items %}
+        {% if item.day_number != ns.day %}
+          {% set ns.day = item.day_number %}
+          <h2 class="text-xl font-bold text-primary">{{ t("اليوم", "Day", ui_lang) }} {{ item.day_number }}</h2>
+        {% endif %}
+        <div class="relative rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div class="absolute -right-[31px] top-8 h-4 w-4 rounded-full border-4 border-white bg-primary dark:border-background-dark"></div>
+          <div class="flex flex-col gap-4 sm:flex-row">
+            <img class="h-28 w-full rounded-lg object-cover sm:w-40" src="{{ city_image(itinerary.destination_city) }}" alt="{{ item.title }}">
+            <div class="flex-1">
+              <h3 class="text-lg font-bold">{{ item.title }}</h3>
+              <p class="mb-4 text-sm text-slate-500">{{ item.notes }}</p>
+              <div class="flex flex-wrap gap-3 text-xs font-medium">
+                <span class="rounded-md bg-slate-100 px-2 py-1 dark:bg-slate-800">{{ t("نشاط", "Activity", ui_lang) }}</span>
+                <span class="rounded-md bg-slate-100 px-2 py-1 dark:bg-slate-800">{{ t("تكلفة", "Cost", ui_lang) }}: {{ item.estimated_cost }} SAR</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="rounded-xl border border-slate-200 bg-white p-6 text-slate-500 dark:border-slate-800 dark:bg-slate-900">{{ t("لا توجد عناصر رحلة مولدة.", "No itinerary items generated.", ui_lang) }}</p>
   {% endif %}
-  <article class="card">
-    <h3>{{ item.title }}</h3>
-    <p>{{ item.notes }}</p>
-    <p>Estimated cost: {{ item.estimated_cost }} SAR</p>
-  </article>
-{% else %}
-  <p>No itinerary items generated.</p>
-{% endfor %}
+
+  <div class="mt-14 rounded-3xl border-2 border-dashed border-primary/20 bg-primary/5 p-10 text-center">
+    <span class="material-symbols-outlined mb-4 text-5xl text-primary">auto_awesome</span>
+    <h3 class="mb-2 text-xl font-bold">{{ t("هل تريد خطة أخرى؟", "Need another plan?", ui_lang) }}</h3>
+    <p class="mx-auto mb-6 max-w-xl text-slate-500">{{ t("يمكنك إعادة التوليد أو تعديل خياراتك لإنشاء مسار جديد.", "Regenerate or adjust your preferences to create a new route.", ui_lang) }}</p>
+    <div class="flex flex-col justify-center gap-3 sm:flex-row">
+      <a href="{{ url_for('main.create_itinerary', lang=ui_lang) }}" class="rounded-xl bg-primary px-8 py-3 font-bold text-white">{{ t("إعادة التوليد", "Regenerate", ui_lang) }}</a>
+      <form method="post" action="{{ url_for('main.delete_itinerary', itinerary_id=itinerary.id, lang=ui_lang) }}">
+        <button type="submit" class="rounded-xl border border-rose-200 px-8 py-3 font-bold text-rose-600 hover:bg-rose-50 dark:border-rose-900/60 dark:hover:bg-rose-950/30">{{ t("حذف الرحلة", "Delete trip", ui_lang) }}</button>
+      </form>
+    </div>
+  </div>
+</section>
 {% endblock %}

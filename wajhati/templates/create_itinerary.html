@@ -1,28 +1,135 @@
 {% extends "base.html" %}
+{% from "components/_i18n.html" import t %}
 {% block content %}
-<h1>Create Itinerary</h1>
-<form method="post" class="form">
-  <label>Destination City</label>
-  <input type="text" name="destination_city" placeholder="Riyadh" required>
+<section class="mx-auto w-full max-w-5xl px-6 py-10">
+  <div class="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+    <div>
+      <p class="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary">
+        <span class="material-symbols-outlined">smart_toy</span>
+        {{ t("تخطيط مدعوم بالذكاء الاصطناعي", "AI-powered planning", ui_lang) }}
+      </p>
+      <h1 class="text-5xl font-black">{{ t("خطط لرحلتك", "Plan Your Trip", ui_lang) }}</h1>
+      <p class="mt-2 text-slate-500">{{ t("صمم رحلة تناسب اهتماماتك وميزانيتك داخل السعودية.", "Build a trip matching your interests and budget across Saudi Arabia.", ui_lang) }}</p>
+    </div>
+  </div>
 
-  <label>Trip Duration (days)</label>
-  <input type="number" name="duration_days" min="1" max="14" value="3" required>
+  <form method="post" class="space-y-8">
+    <input type="hidden" name="lang" value="{{ ui_lang }}">
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+      <section class="rounded-3xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900">
+        <h3 class="mb-5 flex items-center gap-2 text-xl font-bold"><span class="material-symbols-outlined text-primary">location_on</span>{{ t("الوجهة", "Destination", ui_lang) }}</h3>
+        <select id="destination_city" name="destination_city" class="h-14 w-full rounded-2xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800" required>
+          <option value="">{{ t("اختر مدينة", "Select city", ui_lang) }}</option>
+          {% for city in cities %}
+            <option value="{{ city }}" {% if form_data.destination_city == city %}selected{% endif %}>{{ city }}</option>
+          {% endfor %}
+        </select>
+      </section>
 
-  <label>Budget (SAR)</label>
-  <input type="number" name="budget" min="0" step="0.01" value="1500" required>
+      <section class="rounded-3xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900">
+        <h3 class="mb-5 flex items-center gap-2 text-xl font-bold"><span class="material-symbols-outlined text-primary">calendar_today</span>{{ t("مدة الرحلة", "Duration", ui_lang) }}</h3>
+        <input id="duration_days" type="number" name="duration_days" min="1" max="7" value="{{ form_data.duration_days }}" class="h-14 w-full rounded-2xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800" required>
+      </section>
+    </div>
 
-  <label>Trip Type</label>
-  <select name="trip_type">
-    <option value="family">Family</option>
-    <option value="adventure">Adventure</option>
-    <option value="cultural">Cultural</option>
-    <option value="leisure" selected>Leisure</option>
-    <option value="business">Business</option>
-  </select>
+    <section class="rounded-3xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900">
+      <h3 class="mb-6 flex items-center gap-2 text-xl font-bold"><span class="material-symbols-outlined text-primary">payments</span>{{ t("الميزانية", "Budget", ui_lang) }}</h3>
+      <input id="budget" name="budget" type="range" min="500" max="10000" step="100" value="{{ form_data.budget }}" class="h-2 w-full cursor-pointer appearance-none rounded-lg bg-slate-200 accent-primary">
+      <div class="mt-4 flex items-center justify-between gap-4 text-sm">
+        <span>{{ t("500 ر.س", "500 SAR", ui_lang) }}</span>
+        <strong class="rounded-full bg-primary/10 px-4 py-2 font-black text-primary"><span id="budget_value">{{ form_data.budget }}</span> SAR</strong>
+        <span>{{ t("10,000 ر.س", "10,000 SAR", ui_lang) }}</span>
+      </div>
+      <div class="mt-4 grid grid-cols-3 text-center text-sm">
+        <span>{{ t("اقتصادية", "Economy", ui_lang) }}</span>
+        <span class="font-bold text-primary">{{ t("متوسطة", "Standard", ui_lang) }}</span>
+        <span>{{ t("فاخرة", "Luxury", ui_lang) }}</span>
+      </div>
+    </section>
 
-  <label>Interests (comma-separated)</label>
-  <input type="text" name="interests" placeholder="culture, nature, shopping">
+    <section class="rounded-3xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900">
+      <h3 class="mb-6 flex items-center gap-2 text-xl font-bold"><span class="material-symbols-outlined text-primary">category</span>{{ t("نوع الرحلة", "Trip Type", ui_lang) }}</h3>
+      <select name="trip_type" class="h-14 w-full rounded-2xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800">
+        {% for trip_type in trip_types %}
+          <option value="{{ trip_type }}" {% if form_data.trip_type == trip_type %}selected{% endif %}>
+            {% if trip_type == "family" %}{{ t("عائلية", "Family", ui_lang) }}{% endif %}
+            {% if trip_type == "adventure" %}{{ t("مغامرة", "Adventure", ui_lang) }}{% endif %}
+            {% if trip_type == "cultural" %}{{ t("ثقافية", "Cultural", ui_lang) }}{% endif %}
+            {% if trip_type == "leisure" %}{{ t("استجمام", "Leisure", ui_lang) }}{% endif %}
+          </option>
+        {% endfor %}
+      </select>
+    </section>
 
-  <button class="btn" type="submit">Generate</button>
-</form>
+    <section class="rounded-3xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900">
+      <h3 class="mb-6 flex items-center gap-2 text-xl font-bold"><span class="material-symbols-outlined text-primary">interests</span>{{ t("اهتماماتك", "Interests", ui_lang) }}</h3>
+      <input type="text" name="interests" value="{{ form_data.interests }}" class="h-14 w-full rounded-2xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800" placeholder="{{ t('nature, shopping, museums', 'nature, shopping, museums', ui_lang) }}">
+      {% if suggested_interests %}
+        <div class="mt-4 flex flex-wrap gap-2">
+          {% for interest in suggested_interests %}
+            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-200">{{ interest }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </section>
+
+    <button type="submit" class="flex w-full items-center justify-center gap-3 rounded-3xl bg-primary py-5 text-2xl font-black text-white shadow-xl shadow-primary/20 hover:opacity-90">
+      {{ t("ابدأ رحلتي", "Generate My Trip", ui_lang) }}
+      <span class="material-symbols-outlined">auto_fix_high</span>
+    </button>
+  </form>
+</section>
+<script>
+  (() => {
+    const form = document.querySelector("form[method='post']");
+    const budget = document.getElementById("budget");
+    const output = document.getElementById("budget_value");
+    if (!budget || !output) return;
+    const updateBudget = () => {
+      output.textContent = budget.value;
+    };
+    const showBudgetError = (message) => {
+      const existingToast = document.querySelector(".flash-toast[data-client-budget-error='true']");
+      if (existingToast) {
+        existingToast.querySelector("p").textContent = message;
+        return;
+      }
+
+      const toast = document.createElement("div");
+      toast.className = "flash-toast pointer-events-auto flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-800 shadow-lg";
+      toast.setAttribute("role", "alert");
+      toast.setAttribute("data-client-budget-error", "true");
+      toast.innerHTML = `
+        <span class="material-symbols-outlined text-base">info</span>
+        <p class="flex-1 text-sm font-semibold"></p>
+        <button type="button" class="material-symbols-outlined text-base opacity-70 hover:opacity-100" data-flash-close aria-label="Close alert">close</button>
+      `;
+      toast.querySelector("p").textContent = message;
+
+      let rail = document.querySelector(".pointer-events-none.fixed.top-24 .flex.w-full.max-w-md.flex-col.gap-3");
+      if (!rail) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "pointer-events-none fixed top-24 z-[120] flex w-full justify-center px-4";
+        wrapper.innerHTML = '<div class="flex w-full max-w-md flex-col gap-3"></div>';
+        document.body.prepend(wrapper);
+        rail = wrapper.querySelector(".flex.w-full.max-w-md.flex-col.gap-3");
+      }
+
+      rail.prepend(toast);
+    };
+
+    if (form) {
+      form.addEventListener("submit", (event) => {
+        const budgetValue = Number(budget.value);
+        if (!Number.isNaN(budgetValue) && budgetValue <= 0) {
+          event.preventDefault();
+          showBudgetError("Budget must be greater than 0.");
+        }
+      });
+    }
+
+    budget.addEventListener("input", updateBudget);
+    updateBudget();
+  })();
+</script>
 {% endblock %}

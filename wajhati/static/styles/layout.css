@@ -1,0 +1,82 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--color-text);
+  background:
+    radial-gradient(circle at 10% 15%, #ecdfca 0%, transparent 34%),
+    radial-gradient(circle at 85% 10%, #d7edf8 0%, transparent 30%),
+    var(--color-bg);
+  line-height: 1.5;
+  text-align: start;
+}
+
+html[dir="rtl"] body {
+  font-family: "Tahoma", "Segoe UI", sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.container {
+  width: min(1120px, 92%);
+  margin: 0 auto;
+}
+
+.page-content {
+  padding: var(--space-8) 0;
+}
+
+.stack {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-5);
+}
+
+.page-header h1,
+.page-header h2,
+.page-header h3,
+h1,
+h2,
+h3 {
+  margin: 0;
+}
+
+.page-header p {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+}
+
+.empty-state {
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 760px) {
+  .page-content {
+    padding: var(--space-6) 0;
+  }
+}

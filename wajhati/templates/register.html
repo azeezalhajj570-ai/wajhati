@@ -1,13 +1,65 @@
 {% extends "base.html" %}
+{% from "components/_i18n.html" import t %}
 {% block content %}
-<h1>Register</h1>
-<form method="post" class="form">
-  <label>Name</label>
-  <input type="text" name="name" required>
-  <label>Email</label>
-  <input type="email" name="email" required>
-  <label>Password</label>
-  <input type="password" name="password" required>
-  <button class="btn" type="submit">Create Account</button>
-</form>
+<section class="mx-auto grid min-h-[calc(100vh-160px)] w-full max-w-6xl grid-cols-1 gap-8 px-6 py-10 lg:grid-cols-2">
+  <div class="relative overflow-hidden rounded-3xl bg-slate-900 p-8 lg:p-10">
+    <div class="absolute inset-0 opacity-55">
+      <img class="h-full w-full object-cover" src="https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1400&q=80" alt="Saudi landscape">
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-t from-background-dark/90 via-background-dark/35 to-transparent"></div>
+    <div class="relative z-10 flex h-full flex-col justify-between">
+      <div>
+        <p class="mb-2 text-xs font-bold uppercase tracking-widest text-primary">{{ t("منصة سياحية ذكية", "Smart Tourism Platform", ui_lang) }}</p>
+        <h1 class="mb-4 text-4xl font-black text-white">{{ t("أنشئ حسابك في وجهتي", "Create Your Wajhati Account", ui_lang) }}</h1>
+        <p class="max-w-xl text-slate-200">{{ t("احفظ خططك، تابع رحلاتك، وخصص تجربتك السياحية داخل المملكة.", "Save itineraries, track your trips, and personalize your tourism experience in Saudi Arabia.", ui_lang) }}</p>
+      </div>
+      <div class="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div class="rounded-xl bg-white/10 p-3 text-white backdrop-blur">
+          <p class="text-2xl font-black">AI</p>
+          <p class="text-xs">{{ t("تخطيط ذكي", "Smart Planning", ui_lang) }}</p>
+        </div>
+        <div class="rounded-xl bg-white/10 p-3 text-white backdrop-blur">
+          <p class="text-2xl font-black">24/7</p>
+          <p class="text-xs">{{ t("مساعد سفر", "Travel Assistant", ui_lang) }}</p>
+        </div>
+        <div class="rounded-xl bg-white/10 p-3 text-white backdrop-blur">
+          <p class="text-2xl font-black">KSA</p>
+          <p class="text-xs">{{ t("وجهات محلية", "Domestic Destinations", ui_lang) }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center">
+    <div class="w-full rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:p-10">
+      <div class="mb-6">
+        <h2 class="text-3xl font-black">{{ t("إنشاء حساب", "Create Account", ui_lang) }}</h2>
+        <p class="mt-2 text-sm text-slate-500">{{ t("ابدأ الآن في تخطيط رحلاتك.", "Start planning your trips now.", ui_lang) }}</p>
+      </div>
+
+      <form method="post" class="space-y-4">
+        <input type="hidden" name="lang" value="{{ ui_lang }}">
+        <div>
+          <label for="name" class="mb-2 block text-sm font-bold">{{ t("الاسم", "Name", ui_lang) }}</label>
+          <input id="name" type="text" name="name" required class="h-12 w-full rounded-xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800">
+        </div>
+        <div>
+          <label for="email" class="mb-2 block text-sm font-bold">{{ t("البريد الإلكتروني", "Email", ui_lang) }}</label>
+          <input id="email" type="email" name="email" required class="h-12 w-full rounded-xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800">
+        </div>
+        <div>
+          <label for="password" class="mb-2 block text-sm font-bold">{{ t("كلمة المرور", "Password", ui_lang) }}</label>
+          <input id="password" type="password" name="password" required class="h-12 w-full rounded-xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800">
+        </div>
+
+        <button class="mt-2 w-full rounded-xl bg-primary py-3 font-bold text-white hover:bg-primary/90" type="submit">{{ t("إنشاء الحساب", "Create Account", ui_lang) }}</button>
+      </form>
+
+      <p class="mt-5 text-sm text-slate-500">
+        {{ t("لديك حساب بالفعل؟", "Already have an account?", ui_lang) }}
+        <a class="font-bold text-primary hover:underline" href="{{ url_for('auth.login', lang=ui_lang) }}">{{ t("تسجيل الدخول", "Login", ui_lang) }}</a>
+      </p>
+    </div>
+  </div>
+</section>
 {% endblock %}

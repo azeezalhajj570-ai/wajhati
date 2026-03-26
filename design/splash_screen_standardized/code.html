@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans+Arabic:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#89cfeb",
+                        "sand": "#f4e4bc",
+                        "sky-soft": "#d0eaf5",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#121c20",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "Noto Sans Arabic", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Noto Sans Arabic', 'Space Grotesk', sans-serif;
+        }
+        .dune-gradient {
+            background: linear-gradient(180deg, #d0eaf5 0%, #f4e4bc 100%);
+        }
+        .skyline-silhouette {
+            mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark overflow-hidden">
+<div class="relative min-h-screen w-full flex flex-col items-center justify-center dune-gradient overflow-hidden">
+<!-- Background Elements -->
+<div class="absolute inset-0 z-0 opacity-40">
+<!-- Desert Dune Illustration Mockup using Gradients -->
+<div class="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-sand/80 to-transparent"></div>
+<div class="absolute -bottom-20 -left-20 w-[600px] h-[300px] bg-sand rounded-full blur-3xl opacity-50"></div>
+<div class="absolute -bottom-20 -right-20 w-[800px] h-[400px] bg-sand/60 rounded-full blur-3xl opacity-50"></div>
+</div>
+<!-- Skyline Silhouette -->
+<div class="absolute bottom-0 w-full h-48 z-1 skyline-silhouette flex items-end justify-center gap-1 opacity-20 grayscale">
+<div class="w-8 h-32 bg-slate-800 rounded-t-sm"></div>
+<div class="w-12 h-48 bg-slate-900 rounded-t-sm"></div>
+<div class="w-6 h-24 bg-slate-700 rounded-t-sm"></div>
+<div class="w-16 h-56 bg-slate-800 rounded-t-md relative">
+<div class="absolute top-4 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-600 rounded-full"></div>
+</div>
+<div class="w-10 h-40 bg-slate-900 rounded-t-sm"></div>
+<div class="w-14 h-64 bg-slate-800 rounded-t-sm"></div>
+<div class="w-8 h-36 bg-slate-700 rounded-t-sm"></div>
+</div>
+<!-- Main Content -->
+<main class="relative z-10 flex flex-col items-center justify-center text-center px-6">
+<!-- Logo Section -->
+<div class="mb-8 p-6 bg-white/20 backdrop-blur-md rounded-3xl border border-white/30 shadow-2xl">
+<div class="size-24 md:size-32 text-slate-900">
+<svg class="w-full h-full drop-shadow-lg" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_319)">
+<path d="M8.57829 8.57829C5.52816 11.6284 3.451 15.5145 2.60947 19.7452C1.76794 23.9758 2.19984 28.361 3.85056 32.3462C5.50128 36.3314 8.29667 39.7376 11.8832 42.134C15.4698 44.5305 19.6865 45.8096 24 45.8096C28.3135 45.8096 32.5302 44.5305 36.1168 42.134C39.7033 39.7375 42.4987 36.3314 44.1494 32.3462C45.8002 28.361 46.2321 23.9758 45.3905 19.7452C44.549 15.5145 42.4718 11.6284 39.4217 8.57829L24 24L8.57829 8.57829Z" fill="currentColor"></path>
+</g>
+<defs>
+<clippath id="clip0_6_319"><rect fill="white" height="48" width="48"></rect></clippath>
+</defs>
+</svg>
+</div>
+</div>
+<!-- Typography -->
+<h1 class="text-4xl md:text-6xl font-bold text-slate-900 mb-4 tracking-tight font-display">
+                وجهتي السعودية
+            </h1>
+<p class="text-xl md:text-2xl font-medium text-slate-700 mb-12 opacity-90">
+                خطط رحلتك بذكاء
+            </p>
+<!-- Loading Indicator -->
+<div class="w-64 md:w-80 flex flex-col gap-4">
+<div class="relative h-1.5 w-full bg-slate-900/10 rounded-full overflow-hidden">
+<div class="absolute top-0 left-0 h-full bg-primary rounded-full w-1/3 shadow-[0_0_10px_rgba(137,207,235,0.8)]"></div>
+</div>
+<div class="flex items-center justify-center gap-2 text-slate-600 font-medium">
+<span class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+<span class="text-sm">جاري تحضير وجهتك القادمة...</span>
+</div>
+</div>
+</main>
+<!-- Footer Credits -->
+
+<!-- Decorative Floating Elements -->
+<div class="absolute top-20 right-20 w-4 h-4 rounded-full bg-white/40 blur-sm"></div>
+<div class="absolute top-40 left-1/4 w-2 h-2 rounded-full bg-white/30 blur-[1px]"></div>
+<div class="absolute bottom-1/3 right-1/4 w-3 h-3 rounded-full bg-white/20 blur-sm"></div>
+<footer class="absolute bottom-8 left-0 right-0 z-10 flex flex-col items-center gap-4 px-6">
+<div class="h-px w-12 bg-slate-900/10 mb-2"></div>
+<div class="flex flex-col items-center gap-1">
+<p class="text-slate-500 font-display font-bold tracking-[0.2em] text-[10px] uppercase">
+            Premium Travel Experience
+        </p>
+<p class="text-slate-400 text-xs font-medium">
+            © 2024 وجهتي السعودية. جميع الحقوق محفوظة
+        </p>
+</div>
+<div class="flex gap-6 mt-2">
+<span class="material-symbols-outlined text-slate-400 text-lg cursor-pointer hover:text-primary transition-colors">share</span>
+<span class="material-symbols-outlined text-slate-400 text-lg cursor-pointer hover:text-primary transition-colors">info</span>
+</div>
+</footer></div>
+<!-- Hidden Imagery Tooling -->
+<div class="hidden">
+<img alt="Dunes" data-alt="Abstract desert dunes minimal illustration" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqh3vMJgu4QEUSD0070FCAmvHO9ZDHnUPvBigMt_OS_QzuHGhk8lo21G5COccyGpsYe62XNjE2Fa1q2JWZdw7C8woCyG3TDYO3sfplXl26yqCYNz3zOQ4w3lcKZ2UezXohgl1kEjlxyYMkREa8mKpN8ylwpLZzc-b1cnG1ss6nKsxUC0F3xedyd2dmv12uqbofbdJK2TbpkA1HgEceGKrQ1voOsVHbIjai3CVZ6qg1GYRVYDuLfP8uHmkHDVDlLELxOUbqrsGXRKJ2"/>
+<img alt="Skyline" data-alt="Modern Saudi city skyline silhouette" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoSKK8Xodai8QnZ3WST-cJjrHPwjb4umJrysEvDZbi11eWH0zeUTaYmajnVjf8xqcdP3tQ41_oZjS4q1KwDgfqn3a9vQWw5x8hKzM0h5pE2X6GfbXtLvw8Wx45KYOgHFOeXrJ4Xa_hVV0B94LFVpvrJ5oUr4fvr4e9oo7naQYsa-hNy0SvVHir-Vf0jXV5wxCLUOd6mu7m2wdYLvQDqaPv3ISL6cT9VcmlEehyAS9au9aWuFGnCIMALz55rV5hoaubwk3AvYplWbU_"/>
+</div>
+</body></html>

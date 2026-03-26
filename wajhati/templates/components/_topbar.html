@@ -1,0 +1,50 @@
+{% from "components/_i18n.html" import t %}
+<header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-background-light/90 backdrop-blur-md dark:border-slate-800 dark:bg-background-dark/80">
+  <div class="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-6">
+    <div class="flex items-center gap-8">
+      <a href="{{ url_for('main.index', lang=ui_lang) }}" class="flex items-center gap-3">
+        <div class="rounded-xl bg-primary p-2 text-white">
+          <span class="material-symbols-outlined">travel_explore</span>
+        </div>
+        <span class="text-xl font-black tracking-tight">{{ t('وجهتي', 'Wajhati', ui_lang) }}</span>
+      </a>
+      <nav class="hidden items-center gap-5 lg:flex">
+        <a class="text-sm font-semibold hover:text-primary" href="{{ url_for('main.index', lang=ui_lang) }}">{{ t('الرئيسية', 'Home', ui_lang) }}</a>
+        <a class="text-sm font-semibold hover:text-primary" href="{{ url_for('main.destinations', lang=ui_lang) }}">{{ t('الوجهات', 'Destinations', ui_lang) }}</a>
+        <a class="text-sm font-semibold hover:text-primary" href="{{ url_for('main.create_itinerary', lang=ui_lang) }}">{{ t('التخطيط', 'Planning', ui_lang) }}</a>
+        <a class="text-sm font-semibold hover:text-primary" href="{{ url_for('main.map_screen', lang=ui_lang) }}">{{ t('الخريطة', 'Map', ui_lang) }}</a>
+        {% if current_user.is_authenticated %}
+          <a class="text-sm font-semibold hover:text-primary" href="{{ url_for('main.my_itineraries', lang=ui_lang) }}">{{ t('رحلاتي', 'My Trips', ui_lang) }}</a>
+        {% endif %}
+      </nav>
+    </div>
+    <div class="flex items-center gap-2">
+      {% if not current_user.is_authenticated %}
+        <a class="rounded-xl border border-slate-200 px-3 py-2 text-sm hover:border-primary dark:border-slate-700" href="{{ url_for('auth.login', lang=ui_lang) }}">{{ t('دخول', 'Login', ui_lang) }}</a>
+        <a class="rounded-xl bg-primary px-3 py-2 text-sm font-semibold text-white hover:bg-primary/90" href="{{ url_for('auth.register', lang=ui_lang) }}">{{ t('إنشاء حساب', 'Register', ui_lang) }}</a>
+      {% endif %}
+      <a class="rounded-xl border px-3 py-2 text-xs font-bold {% if ui_lang == 'ar' %}border-primary text-primary{% else %}border-slate-200{% endif %}" href="{{ request.path }}?lang=ar">AR</a>
+      <a class="rounded-xl border px-3 py-2 text-xs font-bold {% if ui_lang == 'en' %}border-primary text-primary{% else %}border-slate-200{% endif %}" href="{{ request.path }}?lang=en">EN</a>
+      {% if current_user.is_authenticated %}
+        <div class="relative" data-profile-wrapper>
+          <button
+            type="button"
+            class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary/20 bg-primary/10 text-primary"
+            data-profile-toggle
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-label="{{ t('قائمة الحساب', 'Account menu', ui_lang) }}">
+            <span class="material-symbols-outlined">person</span>
+          </button>
+          <div
+            class="absolute {% if ui_lang == 'ar' %}left-0{% else %}right-0{% endif %} top-12 z-50 hidden min-w-[170px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
+            data-profile-menu
+            role="menu">
+            <a class="block px-4 py-3 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800" href="{{ url_for('main.my_itineraries', lang=ui_lang) }}">{{ t('رحلاتي', 'My Trips', ui_lang) }}</a>
+            <a class="block px-4 py-3 text-sm font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" href="{{ url_for('auth.logout') }}">{{ t('تسجيل الخروج', 'Logout', ui_lang) }}</a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</header>

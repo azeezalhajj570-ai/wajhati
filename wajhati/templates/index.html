@@ -1,22 +1,115 @@
 {% extends "base.html" %}
+{% from "components/_i18n.html" import t %}
+{% from "components/_media.html" import destination_image, city_image %}
 {% block content %}
-<section class="hero">
-  <h1>Smart Tourism Planner for Saudi Arabia</h1>
-  <p>Plan domestic trips with personalized recommendations, budgets, and day-by-day itineraries.</p>
-  <a class="btn" href="{{ url_for('main.create_itinerary') }}">Start Planning</a>
-</section>
+<section class="mx-auto w-full max-w-7xl px-6 py-8">
+  <section class="relative mb-12 flex min-h-[420px] items-center justify-center overflow-hidden rounded-3xl bg-slate-900 p-8 text-center">
+    <div class="absolute inset-0 opacity-60">
+      <img class="h-full w-full object-cover" src="https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1400&q=80" alt="Hero">
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-t from-background-dark/80 via-transparent to-transparent"></div>
+    <div class="relative z-10 max-w-3xl">
+      <h1 class="mb-4 text-4xl font-black text-white md:text-5xl">{{ t("مرحبا بك في وجهتي السعودية", "Welcome to Wajhati Saudiya", ui_lang) }}</h1>
+      <p class="mb-8 text-lg text-slate-200">{{ t("اكتشف أجمل الوجهات داخل المملكة وخطط رحلتك الذكية بسهولة.", "Discover the best local destinations and build smart itineraries quickly.", ui_lang) }}</p>
+      <div class="mx-auto flex max-w-2xl flex-col gap-3 rounded-2xl border border-white/20 bg-white/10 p-2 backdrop-blur-xl md:flex-row">
+        <a class="w-full rounded-xl bg-white px-4 py-3 font-bold text-slate-900 hover:bg-slate-100" href="{{ url_for('main.destinations', lang=ui_lang) }}">{{ t("استكشف الوجهات", "Explore destinations", ui_lang) }}</a>
+        <a class="rounded-xl bg-primary px-8 py-3 font-bold text-white hover:bg-primary/90" href="{{ url_for('main.create_itinerary', lang=ui_lang) }}">{{ t("ابدأ رحلة جديدة", "Start New Trip", ui_lang) }}</a>
+      </div>
+    </div>
+  </section>
 
-<h2>Featured Destinations</h2>
-<div class="grid">
-  {% for destination in destinations %}
-    <article class="card">
-      <h3>{{ destination.name }}</h3>
-      <p>{{ destination.city }} | {{ destination.category }}</p>
-      <p>{{ destination.description[:120] }}...</p>
-      <a href="{{ url_for('main.destination_detail', destination_id=destination.id) }}">View</a>
-    </article>
-  {% else %}
-    <p>No destinations yet. Run the seed script to add sample data.</p>
-  {% endfor %}
-</div>
+  <div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
+    <div class="space-y-10 lg:col-span-8">
+      <section>
+        <div class="mb-5 flex items-center justify-between">
+          <h2 class="text-2xl font-bold">{{ t("وجهات مقترحة", "Recommended Destinations", ui_lang) }}</h2>
+          <a class="text-sm font-semibold text-primary" href="{{ url_for('main.destinations', lang=ui_lang) }}">{{ t("عرض الكل", "View All", ui_lang) }}</a>
+        </div>
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          {% for destination in destinations[:4] %}
+            <a href="{{ url_for('main.destination_detail', destination_id=destination.id, lang=ui_lang) }}" class="group block">
+              <div class="relative mb-3 h-64 overflow-hidden rounded-2xl">
+                <img class="h-full w-full object-cover transition duration-500 group-hover:scale-105" src="{{ destination_image(destination) }}" alt="{{ destination.name }}">
+                <div class="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-primary">{{ destination.category }}</div>
+              </div>
+              <h3 class="text-lg font-bold group-hover:text-primary">{{ destination.name }}</h3>
+              <p class="text-sm text-slate-500">{{ destination.city }}</p>
+            </a>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800/40">
+        <div class="mb-6 flex items-center justify-between">
+          <h3 class="text-2xl font-bold">{{ t("رحلاتك القادمة", "Your Latest Trips", ui_lang) }}</h3>
+          {% if current_user.is_authenticated and recent_itineraries %}
+            <a class="text-sm font-semibold text-primary" href="{{ url_for('main.my_itineraries', lang=ui_lang) }}">{{ t("كل الرحلات", "All trips", ui_lang) }}</a>
+          {% endif %}
+        </div>
+
+        {% if current_user.is_authenticated and recent_itineraries %}
+          <div class="space-y-4">
+            {% for itinerary in recent_itineraries %}
+              <a href="{{ url_for('main.itinerary_detail', itinerary_id=itinerary.id, lang=ui_lang) }}" class="flex flex-col gap-5 rounded-2xl border border-slate-200 p-4 transition hover:border-primary/40 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 md:flex-row md:items-center">
+                <img class="h-28 w-full rounded-2xl object-cover md:w-32" src="{{ city_image(itinerary.destination_city) }}" alt="{{ itinerary.destination_city }}">
+                <div class="flex-1">
+                  <p class="text-xs font-bold uppercase tracking-wider text-primary">{{ itinerary.trip_type }}</p>
+                  <h4 class="text-xl font-bold">{{ itinerary.destination_city }}</h4>
+                  <p class="text-sm text-slate-500">{{ itinerary.duration_days }} {{ t("أيام", "days", ui_lang) }} • {{ itinerary.estimated_total_cost }} SAR</p>
+                </div>
+                <span class="text-sm font-bold text-primary">{{ t("فتح الرحلة", "Open trip", ui_lang) }}</span>
+              </a>
+            {% endfor %}
+          </div>
+        {% elif current_user.is_authenticated %}
+          <div class="rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
+            <p class="mb-5 text-slate-500">{{ t("لا توجد رحلات محفوظة بعد. أنشئ أول خطة لك الآن.", "No saved trips yet. Create your first itinerary now.", ui_lang) }}</p>
+            <a class="rounded-xl bg-primary px-5 py-3 font-bold text-white hover:bg-primary/90" href="{{ url_for('main.create_itinerary', lang=ui_lang) }}">{{ t("إنشاء رحلة", "Create itinerary", ui_lang) }}</a>
+          </div>
+        {% else %}
+          <div class="rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
+            <p class="mb-5 text-slate-500">{{ t("سجل الدخول لحفظ خططك ومتابعة رحلاتك القادمة.", "Sign in to save plans and keep track of your trips.", ui_lang) }}</p>
+            <a class="rounded-xl bg-primary px-5 py-3 font-bold text-white hover:bg-primary/90" href="{{ url_for('auth.login', lang=ui_lang) }}">{{ t("تسجيل الدخول", "Login", ui_lang) }}</a>
+          </div>
+        {% endif %}
+      </section>
+    </div>
+
+    <aside class="space-y-8 lg:col-span-4">
+      <section class="rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800/40">
+        <div class="mb-5 flex items-center justify-between">
+          <h3 class="text-lg font-bold">{{ t("ملخصك", "Your Snapshot", ui_lang) }}</h3>
+          <span class="material-symbols-outlined text-slate-400">insights</span>
+        </div>
+        {% if current_user.is_authenticated %}
+          <div class="space-y-4">
+            <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+              <span class="text-sm text-slate-500">{{ t("الرحلات", "Trips", ui_lang) }}</span>
+              <strong>{{ itinerary_count }}</strong>
+            </div>
+            <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+              <span class="text-sm text-slate-500">{{ t("المفضلة", "Favorites", ui_lang) }}</span>
+              <strong>{{ favorites_count }}</strong>
+            </div>
+            <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 dark:bg-slate-800">
+              <span class="text-sm text-slate-500">{{ t("التقييمات", "Reviews", ui_lang) }}</span>
+              <strong>{{ reviews_count }}</strong>
+            </div>
+          </div>
+        {% else %}
+          <p class="text-sm leading-7 text-slate-500">{{ t("واجهة شخصية تبدأ بعد تسجيل الدخول، مع خطط محفوظة ومفضلة وتقييماتك.", "Your personal dashboard appears after login, with saved plans, favorites, and reviews.", ui_lang) }}</p>
+        {% endif %}
+      </section>
+
+      <a href="{{ url_for('main.map_screen', lang=ui_lang) }}" class="group relative block h-64 overflow-hidden rounded-3xl">
+        <img class="h-full w-full object-cover opacity-60 transition duration-500 group-hover:opacity-100" src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1000&q=80" alt="Map">
+        <div class="absolute inset-0 grid place-content-center bg-primary/75 p-6 text-center text-white">
+          <span class="material-symbols-outlined mb-2 text-4xl">map</span>
+          <h4 class="text-xl font-bold">{{ t("خريطة الوجهات", "Destination Map", ui_lang) }}</h4>
+          <p class="text-sm text-white/85">{{ t("استكشف المواقع القريبة وخط السير", "Explore nearby locations and optimized routes", ui_lang) }}</p>
+        </div>
+      </a>
+    </aside>
+  </div>
+</section>
 {% endblock %}

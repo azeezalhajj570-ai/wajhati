@@ -1,38 +1,153 @@
+{% set referrer_lang = none %}
+{% if request.referrer and '?lang=' in request.referrer %}
+  {% set referrer_lang = request.referrer.split('?lang=')[-1].split('&')[0] %}
+{% endif %}
+{% set requested_lang = request.args.get('lang') or referrer_lang or 'ar' %}
+{% set ui_lang = requested_lang if requested_lang in ['ar', 'en'] else 'ar' %}
+{% set page_dir = 'rtl' if ui_lang == 'ar' else 'ltr' %}
 <!doctype html>
-<html lang="en">
+<html lang="{{ ui_lang }}" dir="{{ page_dir }}">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Wajhati Saudiya</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#ec5b13",
+              "background-light": "#f8f6f6",
+              "background-dark": "#221610",
+            },
+            fontFamily: {
+              display: ["Public Sans", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20260224a') }}">
   </head>
-  <body>
-    <header class="nav">
-      <div class="container nav-inner">
-        <a href="{{ url_for('main.index') }}" class="brand">Wajhati Saudiya</a>
-        <nav>
-          <a href="{{ url_for('main.destinations') }}">Destinations</a>
-          {% if current_user.is_authenticated %}
-            <a href="{{ url_for('main.create_itinerary') }}">New Itinerary</a>
-            <a href="{{ url_for('main.my_itineraries') }}">My Itineraries</a>
-            <a href="{{ url_for('auth.logout') }}">Logout</a>
-          {% else %}
-            <a href="{{ url_for('auth.login') }}">Login</a>
-            <a href="{{ url_for('auth.register') }}">Register</a>
-          {% endif %}
-        </nav>
-      </div>
-    </header>
+  <body class="lang-{{ ui_lang }} min-h-screen bg-background-light text-slate-900 dark:bg-background-dark dark:text-slate-100">
+    <div class="flex min-h-screen flex-col">
+    {% block topbar %}
+      {% include "components/_topbar.html" %}
+    {% endblock %}
 
-    <main class="container">
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          {% for category, message in messages %}
-            <div class="flash flash-{{ category }}">{{ message }}</div>
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
+    <main class="flex-1">
+      {% include "components/_flashes.html" %}
       {% block content %}{% endblock %}
     </main>
+    {% include "components/_footer.html" %}
+    </div>
+    <script>
+      (() => {
+        const tabs = document.querySelectorAll("[data-tabs]");
+        tabs.forEach((group) => {
+          const buttons = group.querySelectorAll("[role='tab']");
+          const panelIds = Array.from(buttons).map((b) => b.getAttribute("aria-controls"));
+          const panels = panelIds.map((id) => document.getElementById(id)).filter(Boolean);
+          buttons.forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const target = btn.getAttribute("aria-controls");
+              buttons.forEach((b) => {
+                const active = b === btn;
+                b.setAttribute("aria-selected", active ? "true" : "false");
+                b.classList.toggle("is-active", active);
+              });
+              panels.forEach((panel) => {
+                panel.hidden = panel.id !== target;
+              });
+            });
+          });
+        });
+
+        const profileWrappers = document.querySelectorAll("[data-profile-wrapper]");
+        profileWrappers.forEach((wrapper) => {
+          const toggle = wrapper.querySelector("[data-profile-toggle]");
+          const menu = wrapper.querySelector("[data-profile-menu]");
+          if (!toggle || !menu) return;
+          toggle.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const isHidden = menu.classList.contains("hidden");
+            document.querySelectorAll("[data-profile-menu]").forEach((m) => m.classList.add("hidden"));
+            document.querySelectorAll("[data-profile-toggle]").forEach((t) => t.setAttribute("aria-expanded", "false"));
+            if (isHidden) {
+              menu.classList.remove("hidden");
+              toggle.setAttribute("aria-expanded", "true");
+            }
+          });
+        });
+
+        document.addEventListener("click", (event) => {
+          const openTarget = event.target.closest("[data-modal-open]");
+          const closeTarget = event.target.closest("[data-modal-close]");
+          const flashCloseTarget = event.target.closest("[data-flash-close]");
+
+          if (openTarget) {
+            const modal = document.getElementById(openTarget.getAttribute("data-modal-open"));
+            if (modal) {
+              modal.hidden = false;
+              document.body.classList.add("modal-open");
+            }
+          }
+
+          if (closeTarget) {
+            const modal = closeTarget.closest(".modal-backdrop");
+            if (modal) {
+              modal.hidden = true;
+              document.body.classList.remove("modal-open");
+            }
+          }
+
+          if (event.target.classList && event.target.classList.contains("modal-backdrop")) {
+            event.target.hidden = true;
+            document.body.classList.remove("modal-open");
+          }
+
+          if (flashCloseTarget) {
+            const toast = flashCloseTarget.closest(".flash-toast");
+            if (toast) {
+              toast.remove();
+            }
+          }
+
+          if (!event.target.closest("[data-profile-wrapper]")) {
+            document.querySelectorAll("[data-profile-menu]").forEach((menu) => menu.classList.add("hidden"));
+            document.querySelectorAll("[data-profile-toggle]").forEach((toggle) => toggle.setAttribute("aria-expanded", "false"));
+          }
+        });
+
+        const toasts = document.querySelectorAll(".flash-toast");
+        toasts.forEach((toast) => {
+          window.setTimeout(() => {
+            toast.remove();
+          }, 4500);
+        });
+
+        if (!document.querySelector("[data-profile-toggle]")) {
+          const guestLoginLinks = Array.from(document.querySelectorAll("a[href*='/login']"));
+          guestLoginLinks.forEach((link) => {
+            if (link.closest("header")) return;
+            try {
+              const nextUrl = new URL(link.href, window.location.origin);
+              if (nextUrl.pathname === "/login") {
+                nextUrl.pathname = "/register";
+                link.href = nextUrl.toString();
+              }
+            } catch (error) {
+              console.warn("Could not normalize guest auth link", error);
+            }
+          });
+        }
+      })();
+    </script>
   </body>
 </html>

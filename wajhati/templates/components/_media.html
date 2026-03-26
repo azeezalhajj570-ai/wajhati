@@ -1,0 +1,21 @@
+{% macro destination_image(destination) -%}
+  {% set hay = ((destination.city or '') ~ ' ' ~ (destination.name or ''))|lower %}
+  {{ city_image(hay) }}
+{%- endmacro %}
+
+{% macro city_image(city_or_text) -%}
+  {% set hay = (city_or_text or '')|lower %}
+  {% if 'riyadh' in hay or 'الرياض' in hay %}
+    {{ url_for('static', filename='images/destinations/riyadh.svg') }}
+  {% elif 'jeddah' in hay or 'جدة' in hay %}
+    {{ url_for('static', filename='images/destinations/jeddah.svg') }}
+  {% elif 'alula' in hay or 'al ula' in hay or 'العلا' in hay %}
+    {{ url_for('static', filename='images/destinations/alula.svg') }}
+  {% elif 'neom' in hay or 'نيوم' in hay %}
+    {{ url_for('static', filename='images/destinations/neom.svg') }}
+  {% elif 'abha' in hay or 'أبها' in hay %}
+    {{ url_for('static', filename='images/destinations/abha.svg') }}
+  {% else %}
+    {{ url_for('static', filename='images/destinations/default.svg') }}
+  {% endif %}
+{%- endmacro %}

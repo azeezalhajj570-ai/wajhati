@@ -1,0 +1,83 @@
+<mxfile host="app.diagrams.net" modified="2026-02-27T00:00:00.000Z" agent="Codex" version="29.5.3" type="device">
+  <diagram name="Sequence - Preferences and Attractions" id="sequence-04b">
+    <mxGraphModel dx="1400" dy="850" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <mxCell id="10" value="User" style="shape=umlActor;html=1;strokeColor=#d79b00;fillColor=#fff2cc;fontColor=#111111;" vertex="1" parent="1">
+          <mxGeometry x="70" y="20" width="40" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="11" value="Mobile/Web UI" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d79b00;fontColor=#111111;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="170" y="70" width="140" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="12" value="Backend" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d79b00;fontColor=#111111;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="430" y="70" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="13" value="Destinations DB" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d79b00;fontColor=#111111;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="700" y="70" width="150" height="40" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="110" value="" style="shape=line;dashed=1;strokeColor=#666666;html=1;" vertex="1" parent="1">
+          <mxGeometry x="90" y="115" width="1" height="560" as="geometry"/>
+        </mxCell>
+        <mxCell id="111" value="" style="shape=line;dashed=1;strokeColor=#666666;html=1;" vertex="1" parent="1">
+          <mxGeometry x="240" y="115" width="1" height="560" as="geometry"/>
+        </mxCell>
+        <mxCell id="112" value="" style="shape=line;dashed=1;strokeColor=#666666;html=1;" vertex="1" parent="1">
+          <mxGeometry x="490" y="115" width="1" height="560" as="geometry"/>
+        </mxCell>
+        <mxCell id="113" value="" style="shape=line;dashed=1;strokeColor=#666666;html=1;" vertex="1" parent="1">
+          <mxGeometry x="775" y="115" width="1" height="560" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="120" value="" style="rounded=0;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="236" y="170" width="8" height="370" as="geometry"/>
+        </mxCell>
+        <mxCell id="121" value="" style="rounded=0;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="486" y="230" width="8" height="250" as="geometry"/>
+        </mxCell>
+        <mxCell id="122" value="" style="rounded=0;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="771" y="290" width="8" height="120" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="200" value="1) Submit trip preferences" style="edgeStyle=none;rounded=0;html=1;endArrow=block;strokeColor=#111111;fontColor=#111111;fontSize=12;exitX=0.5;exitY=0.11607;entryX=0.5;entryY=0.11607;" edge="1" parent="1" source="110" target="111">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="90" y="180" as="sourcePoint"/>
+            <mxPoint x="240" y="180" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="201" value="2) Send preferences + token" style="edgeStyle=none;rounded=0;html=1;endArrow=block;strokeColor=#111111;fontColor=#111111;fontSize=12;exitX=0.5;exitY=0.22321;entryX=0.5;entryY=0.22321;" edge="1" parent="1" source="111" target="112">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="240" y="240" as="sourcePoint"/>
+            <mxPoint x="490" y="240" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="202" value="3) Query attractions / metadata" style="edgeStyle=none;rounded=0;html=1;endArrow=block;strokeColor=#111111;fontColor=#111111;fontSize=12;exitX=0.5;exitY=0.33036;entryX=0.5;entryY=0.33036;" edge="1" parent="1" source="112" target="113">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="490" y="300" as="sourcePoint"/>
+            <mxPoint x="775" y="300" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="203" value="4) Candidate attractions + metadata" style="edgeStyle=none;rounded=0;html=1;dashed=1;endArrow=open;strokeColor=#111111;fontColor=#111111;fontSize=12;exitX=0.5;exitY=0.4375;entryX=0.5;entryY=0.4375;" edge="1" parent="1" source="113" target="112">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="775" y="360" as="sourcePoint"/>
+            <mxPoint x="490" y="360" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="204" value="5) Validation or retrieval status" style="edgeStyle=none;rounded=0;html=1;dashed=1;endArrow=open;strokeColor=#111111;fontColor=#111111;fontSize=12;exitX=0.5;exitY=0.54464;entryX=0.5;entryY=0.54464;" edge="1" parent="1" source="112" target="111">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="490" y="420" as="sourcePoint"/>
+            <mxPoint x="240" y="420" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="205" value="6) Show attraction candidates" style="edgeStyle=none;rounded=0;html=1;dashed=1;endArrow=open;strokeColor=#111111;fontColor=#111111;fontSize=12;exitX=0.5;exitY=0.65179;entryX=0.5;entryY=0.65179;" edge="1" parent="1" source="111" target="110">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="240" y="480" as="sourcePoint"/>
+            <mxPoint x="90" y="480" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
