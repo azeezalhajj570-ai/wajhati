@@ -114,7 +114,6 @@
     const bounds = [];
     let currentLocationMarker = null;
     let accuracyCircle = null;
-    const geolocationDebugPrefix = "[Wajhati geolocation]";
 
     destinations.forEach((destination) => {
       if (destination.latitude == null || destination.longitude == null) return;
@@ -149,15 +148,6 @@
       if (locationStatus) locationStatus.textContent = message;
     };
 
-    const logGeolocation = (label, payload = {}) => {
-      console.log(`${geolocationDebugPrefix} ${label}`, payload);
-      try {
-        console.log(`${geolocationDebugPrefix} ${label} json=${JSON.stringify(payload)}`);
-      } catch (error) {
-        console.log(`${geolocationDebugPrefix} ${label} json-unavailable`);
-      }
-    };
-
     const currentLocationIcon = L.divIcon({
       className: "current-location-marker",
       html: '<div style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:9999px;background:#0f766e;border:3px solid white;box-shadow:0 8px 18px rgba(15,118,110,.35);"><div style="width:8px;height:8px;border-radius:9999px;background:white;"></div></div>',
@@ -168,12 +158,6 @@
     const showCurrentLocation = (position) => {
       const { latitude, longitude, accuracy } = position.coords;
       const latLng = [latitude, longitude];
-      logGeolocation("success", {
-        latitude,
-        longitude,
-        accuracy,
-        timestamp: position.timestamp,
-      });
 
       if (currentLocationMarker) {
         currentLocationMarker.setLatLng(latLng);
@@ -207,14 +191,6 @@
     };
 
     const showLocationError = (error) => {
-      const errorDetails = {
-        code: error?.code,
-        message: error?.message,
-        secureContext: window.isSecureContext,
-        origin: window.location.origin,
-        userAgent: navigator.userAgent,
-      };
-      logGeolocation("error", errorDetails);
       const fallback = "{{ t('تعذر الوصول إلى موقعك الحالي.', 'Unable to access your current location.', ui_lang) }}";
       if (!error) {
         setLocationStatus(fallback);
@@ -236,37 +212,11 @@
     };
 
     if (locateButton) {
-      logGeolocation("init", {
-        geolocationSupported: Boolean(navigator.geolocation),
-        secureContext: window.isSecureContext,
-        origin: window.location.origin,
-      });
-
-      if (navigator.permissions && navigator.permissions.query) {
-        navigator.permissions
-          .query({ name: "geolocation" })
-          .then((result) => {
-            logGeolocation("permission-state", { state: result.state });
-            result.addEventListener("change", () => {
-              logGeolocation("permission-state-change", { state: result.state });
-            });
-          })
-          .catch((permissionError) => {
-            logGeolocation("permission-check-failed", { message: permissionError?.message });
-          });
-      }
-
       locateButton.addEventListener("click", () => {
         if (!navigator.geolocation) {
-          logGeolocation("unsupported");
           setLocationStatus("{{ t('المتصفح لا يدعم تحديد الموقع.', 'This browser does not support geolocation.', ui_lang) }}");
           return;
         }
-        logGeolocation("request-start", {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 60000,
-        });
         setLocationStatus("{{ t('جارٍ تحديد موقعك...', 'Locating you...', ui_lang) }}");
         navigator.geolocation.getCurrentPosition(showCurrentLocation, showLocationError, {
           enableHighAccuracy: true,
