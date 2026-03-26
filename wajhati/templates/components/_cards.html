@@ -1,8 +1,8 @@
 {% from "components/_i18n.html" import t %}
 {% macro destination_card(destination, detail_url, ui_lang='ar') -%}
   <article class="card">
-    <h3 class="card-title">{{ destination.name }}</h3>
-    <p class="card-meta">{{ destination.city }} | {{ destination.category }}</p>
+    <h3 class="card-title">{{ tr_destination(destination.name, ui_lang) }}</h3>
+    <p class="card-meta">{{ tr_city(destination.city, ui_lang) }} | {{ tr_category(destination.category, ui_lang) }}</p>
     {% if destination.description %}
       <p>{{ destination.description[:140] }}{% if destination.description|length > 140 %}...{% endif %}</p>
     {% endif %}
@@ -17,7 +17,7 @@
 
 {% macro itinerary_card(itinerary, detail_url, ui_lang='ar') -%}
   <article class="card">
-    <h3 class="card-title">{{ itinerary.destination_city }} ({{ itinerary.duration_days }} {{ t('أيام', 'days', ui_lang) }})</h3>
+    <h3 class="card-title">{{ tr_city(itinerary.destination_city, ui_lang) }} ({{ itinerary.duration_days }} {{ t('أيام', 'days', ui_lang) }})</h3>
     <p class="card-meta">{{ itinerary.trip_type }} | {{ itinerary.created_at.strftime("%Y-%m-%d") }}</p>
     <p><strong>{{ itinerary.estimated_total_cost }}</strong> {{ t('ر.س', 'SAR', ui_lang) }}</p>
     <div class="card-actions">

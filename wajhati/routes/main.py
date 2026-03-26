@@ -6,10 +6,35 @@ from flask_login import current_user, login_required
 from wajhati import db
 from wajhati.models import Destination, Favorite, Itinerary, ItineraryItem, Review
 from wajhati.services.recommender import generate_itinerary, match_destinations
+from wajhati.translations import SAUDI_CITIES, tr_category, tr_city, tr_destination, tr_season
 
 main_bp = Blueprint("main", __name__)
 
 TRIP_TYPES = ("family", "adventure", "cultural", "leisure")
+AGE_RANGE_OPTIONS = ("under_18", "18_24", "25_34", "35_44", "45_54", "55_plus")
+GENDER_OPTIONS = ("male", "female")
+PROFILE_TAG_OPTIONS = (
+    "cultural",
+    "history",
+    "museums",
+    "art",
+    "food",
+    "shopping",
+    "nature",
+    "adventure",
+    "family",
+    "beaches",
+    "nightlife",
+    "wellness",
+    "photography",
+    "luxury",
+    "budget",
+    "road_trips",
+    "camping",
+    "wildlife",
+    "romantic",
+    "leisure",
+)
 
 
 def _get_ui_lang():
@@ -24,6 +49,70 @@ def _parse_interests(raw_value):
     return [item.strip() for item in str(raw_value).split(",") if item.strip()]
 
 
+def _ui_text(ar, en, lang=None):
+    lang = lang or _get_ui_lang()
+    return ar if lang == "ar" else en
+
+
+def _parse_profile_tags(raw_values, manual_value=""):
+    tags = []
+    seen = set()
+    for raw in list(raw_values or []) + _parse_interests(manual_value):
+        normalized = raw.strip().lower()
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        tags.append(normalized)
+    return tags
+
+
+def _build_profile_form_data(form=None, user=None):
+    form = form or {}
+    if form:
+        selected_tags = _parse_profile_tags(form.getlist("favorite_tags"), form.get("favorite_tags_custom", ""))
+        age_range = str(form.get("age_range", "")).strip()
+        gender = str(form.get("gender", "")).strip()
+    else:
+        selected_tags = user.favorite_tags_list() if user else []
+        age_range = (user.age_range or "") if user else ""
+        gender = (user.gender or "") if user else ""
+
+    custom_tags = [tag for tag in selected_tags if tag not in PROFILE_TAG_OPTIONS]
+    return {
+        "age_range": age_range,
+        "gender": gender,
+        "favorite_tags": selected_tags,
+        "favorite_tags_custom": ", ".join(custom_tags),
+    }
+
+
+def _validate_profile_form(form_data):
+    errors = []
+    age_range = form_data["age_range"]
+    gender = form_data["gender"]
+
+    if age_range and age_range not in AGE_RANGE_OPTIONS:
+        errors.append(("يرجى اختيار فئة عمرية صحيحة.", "Please choose a valid age range."))
+    if gender and gender not in GENDER_OPTIONS:
+        errors.append(("يرجى اختيار نوع صحيح.", "Please choose a valid gender option."))
+    return {
+        "age_range": age_range,
+        "gender": gender,
+        "favorite_tags": form_data["favorite_tags"],
+        "errors": errors,
+    }
+
+
+def _user_profile_context(user):
+    if not user or not getattr(user, "is_authenticated", False):
+        return {"age_range": "", "gender": "", "favorite_tags": []}
+    return {
+        "age_range": user.age_range or "",
+        "gender": user.gender or "",
+        "favorite_tags": user.favorite_tags_list(),
+    }
+
+
 def _build_itinerary_form_data(form=None):
     form = form or {}
     return {
@@ -35,34 +124,46 @@ def _build_itinerary_form_data(form=None):
     }
 
 
+def _available_cities():
+    db_cities = [
+        row[0]
+        for row in db.session.query(Destination.city)
+        .filter(Destination.city.isnot(None))
+        .distinct()
+        .order_by(Destination.city.asc())
+        .all()
+    ]
+    return sorted(dict.fromkeys([*SAUDI_CITIES, *db_cities]))
+
+
 def _validate_itinerary_form(form_data, available_cities):
     errors = []
 
     city = form_data["destination_city"]
     if not city:
-        errors.append("Please choose a destination city.")
+        errors.append(("يرجى اختيار مدينة الوجهة.", "Please choose a destination city."))
     elif city not in available_cities:
-        errors.append("Please choose a destination city from the available list.")
+        errors.append(("يرجى اختيار مدينة وجهة من القائمة المتاحة.", "Please choose a destination city from the available list."))
 
     try:
         duration_days = int(form_data["duration_days"])
         if duration_days < 1 or duration_days > 7:
-            errors.append("Trip duration must be between 1 and 7 days.")
+            errors.append(("يجب أن تكون مدة الرحلة بين يوم واحد و7 أيام.", "Trip duration must be between 1 and 7 days."))
     except ValueError:
         duration_days = 3
-        errors.append("Trip duration must be a valid number.")
+        errors.append(("يجب أن تكون مدة الرحلة رقمًا صالحًا.", "Trip duration must be a valid number."))
 
     try:
         budget = float(form_data["budget"])
         if budget <= 0:
-            errors.append("Budget must be greater than 0.")
+            errors.append(("يجب أن تكون الميزانية أكبر من 0.", "Budget must be greater than 0."))
     except ValueError:
         budget = 0
-        errors.append("Budget must be a valid number.")
+        errors.append(("يجب أن تكون الميزانية رقمًا صالحًا.", "Budget must be a valid number."))
 
     trip_type = form_data["trip_type"]
     if trip_type not in TRIP_TYPES:
-        errors.append("Trip type is invalid.")
+        errors.append(("نوع الرحلة غير صالح.", "Trip type is invalid."))
 
     interests = _parse_interests(form_data["interests"])
 
@@ -74,6 +175,41 @@ def _validate_itinerary_form(form_data, available_cities):
         "interests": interests,
         "errors": errors,
     }
+
+
+@main_bp.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    lang = _get_ui_lang()
+    form_data = _build_profile_form_data(request.form if request.method == "POST" else None, current_user)
+
+    if request.method == "POST":
+        parsed = _validate_profile_form(form_data)
+        for error in parsed["errors"]:
+            flash(_ui_text(error[0], error[1], lang), "danger")
+        if parsed["errors"]:
+            return render_template(
+                "profile.html",
+                form_data=form_data,
+                age_range_options=AGE_RANGE_OPTIONS,
+                gender_options=GENDER_OPTIONS,
+                profile_tag_options=PROFILE_TAG_OPTIONS,
+            )
+
+        current_user.age_range = parsed["age_range"] or None
+        current_user.gender = parsed["gender"] or None
+        current_user.favorite_tags = ", ".join(parsed["favorite_tags"])
+        db.session.commit()
+        flash(_ui_text("تم تحديث الملف الشخصي بنجاح.", "Profile updated successfully.", lang), "success")
+        return redirect(url_for("main.profile", lang=lang))
+
+    return render_template(
+        "profile.html",
+        form_data=form_data,
+        age_range_options=AGE_RANGE_OPTIONS,
+        gender_options=GENDER_OPTIONS,
+        profile_tag_options=PROFILE_TAG_OPTIONS,
+    )
 
 
 @main_bp.route("/")
@@ -109,14 +245,7 @@ def index():
 def destinations():
     city = request.args.get("city", "").strip()
     category = request.args.get("category", "").strip()
-    cities = [
-        row[0]
-        for row in db.session.query(Destination.city)
-        .filter(Destination.city.isnot(None))
-        .distinct()
-        .order_by(Destination.city.asc())
-        .all()
-    ]
+    cities = _available_cities()
     categories = [
         row[0]
         for row in db.session.query(Destination.category)
@@ -213,14 +342,8 @@ def toggle_favorite(destination_id):
 @login_required
 def create_itinerary():
     lang = _get_ui_lang()
-    cities = [
-        row[0]
-        for row in db.session.query(Destination.city)
-        .distinct()
-        .order_by(Destination.city.asc())
-        .all()
-    ]
-    suggested_interests = [
+    cities = _available_cities()
+    category_interests = [
         row[0]
         for row in db.session.query(Destination.category)
         .filter(Destination.category.isnot(None))
@@ -228,12 +351,13 @@ def create_itinerary():
         .order_by(Destination.category.asc())
         .all()
     ]
+    suggested_interests = list(dict.fromkeys([*PROFILE_TAG_OPTIONS, *category_interests]))
     form_data = _build_itinerary_form_data(request.form if request.method == "POST" else None)
 
     if request.method == "POST":
         parsed = _validate_itinerary_form(form_data, cities)
         for error in parsed["errors"]:
-            flash(error, "danger")
+            flash(_ui_text(error[0], error[1], lang), "danger")
         if parsed["errors"]:
             return render_template(
                 "create_itinerary.html",
@@ -249,9 +373,10 @@ def create_itinerary():
             city=parsed["city"],
             budget=parsed["budget"],
             interests=parsed["interests"],
+            profile_context=_user_profile_context(current_user),
         )
         if not matched:
-            flash("No destinations matched your current preferences. Try a different city, budget, or interests.", "warning")
+            flash(_ui_text("لم نتمكن من العثور على وجهات تطابق تفضيلاتك الحالية. جرّب مدينة أو ميزانية أو اهتمامات مختلفة.", "No destinations matched your current preferences. Try a different city, budget, or interests.", lang), "warning")
             return render_template(
                 "create_itinerary.html",
                 cities=cities,
@@ -266,9 +391,10 @@ def create_itinerary():
             budget=parsed["budget"],
             trip_type=parsed["trip_type"],
             interests=parsed["interests"],
+            profile_context=_user_profile_context(current_user),
         )
         if not generated["items"]:
-            flash("We could not generate an itinerary from the selected preferences.", "warning")
+            flash(_ui_text("تعذر إنشاء خطة رحلة من التفضيلات المحددة.", "We could not generate an itinerary from the selected preferences.", lang), "warning")
             return render_template(
                 "create_itinerary.html",
                 cities=cities,
@@ -353,15 +479,9 @@ def delete_itinerary(itinerary_id):
 
 @main_bp.route("/map")
 def map_screen():
+    lang = _get_ui_lang()
     city = request.args.get("city", "").strip()
-    cities = [
-        row[0]
-        for row in db.session.query(Destination.city)
-        .filter(Destination.city.isnot(None))
-        .distinct()
-        .order_by(Destination.city.asc())
-        .all()
-    ]
+    cities = _available_cities()
     if city and city not in cities:
         city = ""
 
@@ -376,18 +496,18 @@ def map_screen():
     map_destinations = [
         {
             "id": destination.id,
-            "name": destination.name,
-            "city": destination.city,
-            "category": destination.category,
+            "name": tr_destination(destination.name, lang),
+            "city": tr_city(destination.city, lang),
+            "category": tr_category(destination.category, lang),
             "description": destination.description,
             "estimated_cost": destination.estimated_cost,
             "latitude": destination.latitude,
             "longitude": destination.longitude,
-            "season": destination.season,
+            "season": tr_season(destination.season, lang),
             "detail_url": url_for(
                 "main.destination_detail",
                 destination_id=destination.id,
-                lang=request.args.get("lang", "ar"),
+                lang=lang,
             ),
         }
         for destination in destinations

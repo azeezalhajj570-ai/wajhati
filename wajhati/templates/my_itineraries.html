@@ -19,12 +19,12 @@
       {% for itinerary in itineraries %}
         <article class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-700 dark:bg-slate-800/50">
           <div class="relative h-44 overflow-hidden">
-            <img class="h-full w-full object-cover transition duration-500 group-hover:scale-105" src="{{ city_image(itinerary.destination_city) }}" alt="{{ itinerary.destination_city }}">
+            <img class="h-full w-full object-cover transition duration-500 group-hover:scale-105" src="{{ city_image(itinerary.destination_city) }}" alt="{{ tr_city(itinerary.destination_city, ui_lang) }}">
             <span class="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-primary">{{ itinerary.trip_type }}</span>
           </div>
 
           <div class="space-y-3 p-5">
-            <h2 class="text-lg font-bold">{{ itinerary.destination_city }}</h2>
+            <h2 class="text-lg font-bold">{{ tr_city(itinerary.destination_city, ui_lang) }}</h2>
             <p class="text-sm text-slate-500">{{ itinerary.created_at.strftime("%Y-%m-%d") }}</p>
             <div class="flex flex-wrap gap-2">
               <span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">{{ itinerary.duration_days }} {{ t("أيام", "days", ui_lang) }}</span>

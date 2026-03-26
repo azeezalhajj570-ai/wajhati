@@ -15,13 +15,14 @@
 
   <form method="post" class="space-y-8">
     <input type="hidden" name="lang" value="{{ ui_lang }}">
+    <div id="client_budget_error" class="hidden rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800"></div>
     <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
       <section class="rounded-3xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900">
         <h3 class="mb-5 flex items-center gap-2 text-xl font-bold"><span class="material-symbols-outlined text-primary">location_on</span>{{ t("الوجهة", "Destination", ui_lang) }}</h3>
-        <select id="destination_city" name="destination_city" class="h-14 w-full rounded-2xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800" required>
+        <select id="destination_city" name="destination_city" data-searchable-select data-search-placeholder="{{ t('ابحث عن مدينة', 'Search city', ui_lang) }}" data-empty-label="{{ t('لا توجد نتائج', 'No matches found', ui_lang) }}" class="h-14 w-full rounded-2xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800" required>
           <option value="">{{ t("اختر مدينة", "Select city", ui_lang) }}</option>
           {% for city in cities %}
-            <option value="{{ city }}" {% if form_data.destination_city == city %}selected{% endif %}>{{ city }}</option>
+            <option value="{{ city }}" {% if form_data.destination_city == city %}selected{% endif %}>{{ tr_city(city, ui_lang) }}</option>
           {% endfor %}
         </select>
       </section>
@@ -49,7 +50,7 @@
 
     <section class="rounded-3xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900">
       <h3 class="mb-6 flex items-center gap-2 text-xl font-bold"><span class="material-symbols-outlined text-primary">category</span>{{ t("نوع الرحلة", "Trip Type", ui_lang) }}</h3>
-      <select name="trip_type" class="h-14 w-full rounded-2xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800">
+      <select name="trip_type" data-searchable-select data-search-placeholder="{{ t('ابحث عن نوع الرحلة', 'Search trip type', ui_lang) }}" data-empty-label="{{ t('لا توجد نتائج', 'No matches found', ui_lang) }}" class="h-14 w-full rounded-2xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800">
         {% for trip_type in trip_types %}
           <option value="{{ trip_type }}" {% if form_data.trip_type == trip_type %}selected{% endif %}>
             {% if trip_type == "family" %}{{ t("عائلية", "Family", ui_lang) }}{% endif %}
@@ -63,17 +64,17 @@
 
     <section class="rounded-3xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-900">
       <h3 class="mb-6 flex items-center gap-2 text-xl font-bold"><span class="material-symbols-outlined text-primary">interests</span>{{ t("اهتماماتك", "Interests", ui_lang) }}</h3>
-      <input type="text" name="interests" value="{{ form_data.interests }}" class="h-14 w-full rounded-2xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800" placeholder="{{ t('nature, shopping, museums', 'nature, shopping, museums', ui_lang) }}">
-      {% if suggested_interests %}
-        <div class="mt-4 flex flex-wrap gap-2">
-          {% for interest in suggested_interests %}
-            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-200">{{ interest }}</span>
-          {% endfor %}
+      <input type="hidden" name="interests" value="{{ form_data.interests }}" id="interests_hidden">
+      <div class="relative">
+        <div id="interests_control" class="flex min-h-14 w-full flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800">
+          <div id="interests_tags" class="flex flex-wrap items-center gap-2"></div>
+          <input type="text" id="interests_input" class="min-w-[140px] flex-1 border-0 bg-transparent px-1 py-2 text-sm outline-none focus:ring-0 dark:bg-transparent" placeholder="{{ t('اختر عدة وسوم من القائمة', 'Select multiple tags from the list', ui_lang) }}" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="interests_suggestions">
         </div>
-      {% endif %}
+        <div id="interests_suggestions" class="absolute z-40 mt-2 hidden max-h-56 w-full overflow-y-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900"></div>
+      </div>
     </section>
 
-    <button type="submit" class="flex w-full items-center justify-center gap-3 rounded-3xl bg-primary py-5 text-2xl font-black text-white shadow-xl shadow-primary/20 hover:opacity-90">
+    <button type="submit" data-itinerary-submit class="flex w-full items-center justify-center gap-3 rounded-3xl bg-primary py-5 text-2xl font-black text-white shadow-xl shadow-primary/20 hover:opacity-90">
       {{ t("ابدأ رحلتي", "Generate My Trip", ui_lang) }}
       <span class="material-symbols-outlined">auto_fix_high</span>
     </button>
@@ -84,52 +85,237 @@
     const form = document.querySelector("form[method='post']");
     const budget = document.getElementById("budget");
     const output = document.getElementById("budget_value");
+    const budgetError = document.getElementById("client_budget_error");
+    const submitButton = document.querySelector("[data-itinerary-submit]");
+    const interestsInput = document.getElementById("interests_input");
+    const interestsHidden = document.getElementById("interests_hidden");
+    const interestsTags = document.getElementById("interests_tags");
+    const interestsSuggestions = document.getElementById("interests_suggestions");
+    const interestsControl = document.getElementById("interests_control");
     if (!budget || !output) return;
     const updateBudget = () => {
       output.textContent = budget.value;
     };
+    const resetBudgetError = () => {
+      if (budgetError) {
+        budgetError.textContent = "";
+        budgetError.classList.add("hidden");
+        budgetError.removeAttribute("role");
+      }
+    };
+    const budgetIsInvalid = () => {
+      const budgetValue = Number(budget.value);
+      return !Number.isNaN(budgetValue) && budgetValue <= 0;
+    };
     const showBudgetError = (message) => {
-      const existingToast = document.querySelector(".flash-toast[data-client-budget-error='true']");
-      if (existingToast) {
-        existingToast.querySelector("p").textContent = message;
-        return;
+      if (budgetError) {
+        budgetError.textContent = message;
+        budgetError.classList.remove("hidden");
+        budgetError.setAttribute("role", "alert");
       }
-
-      const toast = document.createElement("div");
-      toast.className = "flash-toast pointer-events-auto flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-800 shadow-lg";
-      toast.setAttribute("role", "alert");
-      toast.setAttribute("data-client-budget-error", "true");
-      toast.innerHTML = `
-        <span class="material-symbols-outlined text-base">info</span>
-        <p class="flex-1 text-sm font-semibold"></p>
-        <button type="button" class="material-symbols-outlined text-base opacity-70 hover:opacity-100" data-flash-close aria-label="Close alert">close</button>
-      `;
-      toast.querySelector("p").textContent = message;
-
-      let rail = document.querySelector(".pointer-events-none.fixed.top-24 .flex.w-full.max-w-md.flex-col.gap-3");
-      if (!rail) {
-        const wrapper = document.createElement("div");
-        wrapper.className = "pointer-events-none fixed top-24 z-[120] flex w-full justify-center px-4";
-        wrapper.innerHTML = '<div class="flex w-full max-w-md flex-col gap-3"></div>';
-        document.body.prepend(wrapper);
-        rail = wrapper.querySelector(".flex.w-full.max-w-md.flex-col.gap-3");
-      }
-
-      rail.prepend(toast);
     };
 
     if (form) {
       form.addEventListener("submit", (event) => {
-        const budgetValue = Number(budget.value);
-        if (!Number.isNaN(budgetValue) && budgetValue <= 0) {
+        resetBudgetError();
+        if (budgetIsInvalid()) {
           event.preventDefault();
-          showBudgetError("Budget must be greater than 0.");
+          showBudgetError("{{ t('يجب أن تكون الميزانية أكبر من 0.', 'Budget must be greater than 0.', ui_lang) }}");
+        }
+      });
+    }
+
+    if (submitButton) {
+      submitButton.addEventListener("click", (event) => {
+        resetBudgetError();
+        if (budgetIsInvalid()) {
+          event.preventDefault();
+          showBudgetError("{{ t('يجب أن تكون الميزانية أكبر من 0.', 'Budget must be greater than 0.', ui_lang) }}");
         }
       });
     }
 
     budget.addEventListener("input", updateBudget);
     updateBudget();
+
+    const interestLabels = {
+      cultural: "{{ tr_interest_tag('cultural', ui_lang) }}",
+      leisure: "{{ tr_interest_tag('leisure', ui_lang) }}",
+      adventure: "{{ tr_interest_tag('adventure', ui_lang) }}",
+      nature: "{{ tr_interest_tag('nature', ui_lang) }}",
+      shopping: "{{ tr_interest_tag('shopping', ui_lang) }}",
+      museums: "{{ tr_interest_tag('museums', ui_lang) }}",
+      food: "{{ tr_interest_tag('food', ui_lang) }}",
+      family: "{{ tr_interest_tag('family', ui_lang) }}",
+      history: "{{ tr_interest_tag('history', ui_lang) }}",
+      art: "{{ tr_interest_tag('art', ui_lang) }}",
+      nightlife: "{{ tr_interest_tag('nightlife', ui_lang) }}",
+      beaches: "{{ tr_interest_tag('beaches', ui_lang) }}",
+      wellness: "{{ tr_interest_tag('wellness', ui_lang) }}",
+      photography: "{{ tr_interest_tag('photography', ui_lang) }}",
+      luxury: "{{ tr_interest_tag('luxury', ui_lang) }}",
+      budget: "{{ tr_interest_tag('budget', ui_lang) }}",
+      road_trips: "{{ tr_interest_tag('road_trips', ui_lang) }}",
+      camping: "{{ tr_interest_tag('camping', ui_lang) }}",
+      wildlife: "{{ tr_interest_tag('wildlife', ui_lang) }}",
+      romantic: "{{ tr_interest_tag('romantic', ui_lang) }}",
+    };
+    const suggestedInterestValues = {{ suggested_interests|tojson }};
+
+    if (interestsInput && interestsHidden && interestsTags && interestsSuggestions && interestsControl) {
+      let tags = interestsHidden.value
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+      let activeSuggestionIndex = -1;
+      let visibleSuggestions = [];
+
+      const syncHidden = () => {
+        interestsHidden.value = tags.join(", ");
+      };
+
+      const openSuggestions = () => {
+        interestsSuggestions.classList.remove("hidden");
+        interestsInput.setAttribute("aria-expanded", "true");
+      };
+
+      const closeSuggestions = () => {
+        interestsSuggestions.classList.add("hidden");
+        interestsInput.setAttribute("aria-expanded", "false");
+        activeSuggestionIndex = -1;
+      };
+
+      const renderTags = () => {
+        interestsTags.innerHTML = "";
+        tags.forEach((tag, index) => {
+          const chip = document.createElement("button");
+          chip.type = "button";
+          chip.className = "inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-2 text-sm font-bold text-primary";
+          chip.innerHTML = `<span>${interestLabels[tag.toLowerCase()] || tag}</span><span aria-hidden="true">&times;</span>`;
+          chip.setAttribute("aria-label", `Remove ${tag}`);
+          chip.addEventListener("click", () => {
+            tags = tags.filter((_, tagIndex) => tagIndex !== index);
+            syncHidden();
+            renderTags();
+            renderSuggestions(interestsInput.value);
+          });
+          interestsTags.appendChild(chip);
+        });
+      };
+
+      const addTag = (rawValue) => {
+        const value = rawValue.trim();
+        if (!value) return;
+        if (!suggestedInterestValues.some((item) => item.toLowerCase() === value.toLowerCase())) return;
+        if (tags.some((tag) => tag.toLowerCase() === value.toLowerCase())) return;
+        tags.push(value);
+        syncHidden();
+        renderTags();
+      };
+
+      const removeTag = (rawValue) => {
+        tags = tags.filter((tag) => tag.toLowerCase() !== rawValue.toLowerCase());
+        syncHidden();
+        renderTags();
+      };
+
+      const toggleTag = (rawValue) => {
+        if (tags.some((tag) => tag.toLowerCase() === rawValue.toLowerCase())) {
+          removeTag(rawValue);
+          return;
+        }
+        addTag(rawValue);
+      };
+
+      const renderSuggestions = (query = "") => {
+        const normalized = query.trim().toLowerCase();
+        visibleSuggestions = suggestedInterestValues.filter((item) => {
+          if (!normalized) return true;
+          const label = (interestLabels[item.toLowerCase()] || item).toLowerCase();
+          return item.toLowerCase().includes(normalized) || label.includes(normalized);
+        });
+
+        interestsSuggestions.innerHTML = "";
+        if (!visibleSuggestions.length) {
+          closeSuggestions();
+          return;
+        }
+
+        visibleSuggestions.forEach((item, index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          const selected = tags.some((tag) => tag.toLowerCase() === item.toLowerCase());
+          button.className = "flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800";
+          button.style.textAlign = document.documentElement.dir === "rtl" ? "right" : "left";
+          button.innerHTML = `<span>${interestLabels[item.toLowerCase()] || item}</span><span class="text-primary">${selected ? "✓" : ""}</span>`;
+          if (index === activeSuggestionIndex) {
+            button.classList.add("bg-slate-100", "dark:bg-slate-800");
+          }
+          button.addEventListener("mousedown", (event) => {
+            event.preventDefault();
+            toggleTag(item);
+            renderSuggestions(interestsInput.value);
+          });
+          interestsSuggestions.appendChild(button);
+        });
+        openSuggestions();
+      };
+
+      interestsInput.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          if (!visibleSuggestions.length) {
+            renderSuggestions(interestsInput.value);
+            return;
+          }
+          activeSuggestionIndex = (activeSuggestionIndex + 1) % visibleSuggestions.length;
+          renderSuggestions(interestsInput.value);
+          return;
+        }
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          if (!visibleSuggestions.length) return;
+          activeSuggestionIndex = activeSuggestionIndex <= 0 ? visibleSuggestions.length - 1 : activeSuggestionIndex - 1;
+          renderSuggestions(interestsInput.value);
+          return;
+        }
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        if (activeSuggestionIndex >= 0 && visibleSuggestions[activeSuggestionIndex]) {
+          toggleTag(visibleSuggestions[activeSuggestionIndex]);
+        }
+        renderSuggestions(interestsInput.value);
+      });
+
+      interestsInput.addEventListener("input", () => {
+        activeSuggestionIndex = -1;
+        renderSuggestions(interestsInput.value);
+      });
+
+      interestsInput.addEventListener("focus", () => {
+        if (!interestsInput.value.trim()) {
+          activeSuggestionIndex = -1;
+        }
+        renderSuggestions("");
+      });
+
+      interestsInput.addEventListener("click", () => {
+        if (document.activeElement !== interestsInput) return;
+        renderSuggestions("");
+      });
+
+      interestsControl.addEventListener("click", () => {
+        interestsInput.focus();
+      });
+
+      interestsInput.addEventListener("blur", () => {
+        window.setTimeout(() => {
+          closeSuggestions();
+        }, 120);
+      });
+
+      renderTags();
+    }
   })();
 </script>
 {% endblock %}

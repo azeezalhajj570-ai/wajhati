@@ -30,10 +30,14 @@
             <a href="{{ url_for('main.destination_detail', destination_id=destination.id, lang=ui_lang) }}" class="group block">
               <div class="relative mb-3 h-64 overflow-hidden rounded-2xl">
                 <img class="h-full w-full object-cover transition duration-500 group-hover:scale-105" src="{{ destination_image(destination) }}" alt="{{ destination.name }}">
-                <div class="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-primary">{{ destination.category }}</div>
+                <div class="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-primary">{{ tr_category(destination.category, ui_lang) }}</div>
               </div>
-              <h3 class="text-lg font-bold group-hover:text-primary">{{ destination.name }}</h3>
-              <p class="text-sm text-slate-500">{{ destination.city }}</p>
+              <h3 class="text-lg font-bold group-hover:text-primary">{{ tr_destination(destination.name, ui_lang) }}</h3>
+              <p class="text-sm text-slate-500">{{ tr_city(destination.city, ui_lang) }}</p>
+              {% if destination.description %}
+                {% set translated_description = tr_description(destination.description, ui_lang) %}
+                <p class="mt-2 line-clamp-2 text-sm text-slate-500">{{ translated_description[:120] }}{% if translated_description|length > 120 %}...{% endif %}</p>
+              {% endif %}
             </a>
           {% endfor %}
         </div>
@@ -51,10 +55,10 @@
           <div class="space-y-4">
             {% for itinerary in recent_itineraries %}
               <a href="{{ url_for('main.itinerary_detail', itinerary_id=itinerary.id, lang=ui_lang) }}" class="flex flex-col gap-5 rounded-2xl border border-slate-200 p-4 transition hover:border-primary/40 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 md:flex-row md:items-center">
-                <img class="h-28 w-full rounded-2xl object-cover md:w-32" src="{{ city_image(itinerary.destination_city) }}" alt="{{ itinerary.destination_city }}">
+                <img class="h-28 w-full rounded-2xl object-cover md:w-32" src="{{ city_image(itinerary.destination_city) }}" alt="{{ tr_city(itinerary.destination_city, ui_lang) }}">
                 <div class="flex-1">
                   <p class="text-xs font-bold uppercase tracking-wider text-primary">{{ itinerary.trip_type }}</p>
-                  <h4 class="text-xl font-bold">{{ itinerary.destination_city }}</h4>
+                  <h4 class="text-xl font-bold">{{ tr_city(itinerary.destination_city, ui_lang) }}</h4>
                   <p class="text-sm text-slate-500">{{ itinerary.duration_days }} {{ t("أيام", "days", ui_lang) }} • {{ itinerary.estimated_total_cost }} SAR</p>
                 </div>
                 <span class="text-sm font-bold text-primary">{{ t("فتح الرحلة", "Open trip", ui_lang) }}</span>

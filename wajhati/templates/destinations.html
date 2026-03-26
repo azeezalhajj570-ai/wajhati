@@ -9,33 +9,33 @@
     </div>
     <div class="absolute inset-0 bg-gradient-to-t from-background-dark/85 via-transparent to-transparent"></div>
     <div class="relative z-10 max-w-3xl">
-      <h1 class="mb-3 text-4xl font-black text-white">{{ t("ط§ط³طھظƒط´ظپ ط§ظ„ظˆط¬ظ‡ط§طھ", "Explore Destinations", ui_lang) }}</h1>
-      <p class="text-slate-200">{{ t("ط§ط¨ط­ط« ط­ط³ط¨ ط§ظ„ظ…ط¯ظٹظ†ط© ط£ظˆ ط§ظ„ظپط¦ط© ظ„ط§ط®طھظٹط§ط± ظˆط¬ظ‡طھظƒ ط§ظ„ظ‚ط§ط¯ظ…ط© ط¯ط§ط®ظ„ ط§ظ„ظ…ظ…ظ„ظƒط©.", "Filter by city or category to find your next destination in Saudi Arabia.", ui_lang) }}</p>
+      <h1 class="mb-3 text-4xl font-black text-white">{{ t("استكشف الوجهات", "Explore Destinations", ui_lang) }}</h1>
+      <p class="text-slate-200">{{ t("ابحث حسب المدينة أو الفئة لاختيار وجهتك القادمة داخل المملكة.", "Filter by city or category to find your next destination in Saudi Arabia.", ui_lang) }}</p>
     </div>
   </section>
 
   <form method="get" class="mb-10 grid grid-cols-1 gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:grid-cols-3 dark:border-slate-700 dark:bg-slate-800/40">
     <input type="hidden" name="lang" value="{{ ui_lang }}">
     <div>
-      <label for="city" class="mb-2 block text-sm font-bold">{{ t("ط§ظ„ظ…ط¯ظٹظ†ط©", "City", ui_lang) }}</label>
-      <select id="city" name="city" class="h-12 w-full rounded-xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800">
+      <label for="city" class="mb-2 block text-sm font-bold">{{ t("المدينة", "City", ui_lang) }}</label>
+      <select id="city" name="city" data-searchable-select data-search-placeholder="{{ t('ابحث عن مدينة', 'Search city', ui_lang) }}" data-empty-label="{{ t('لا توجد نتائج', 'No matches found', ui_lang) }}" class="h-12 w-full rounded-xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800">
         <option value="">{{ t("جميع المدن", "All cities", ui_lang) }}</option>
         {% for city_option in cities %}
-          <option value="{{ city_option }}" {% if city == city_option %}selected{% endif %}>{{ city_option }}</option>
+          <option value="{{ city_option }}" {% if city == city_option %}selected{% endif %}>{{ tr_city(city_option, ui_lang) }}</option>
         {% endfor %}
       </select>
     </div>
     <div>
-      <label for="category" class="mb-2 block text-sm font-bold">{{ t("ط§ظ„ظپط¦ط©", "Category", ui_lang) }}</label>
-      <select id="category" name="category" class="h-12 w-full rounded-xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800">
+      <label for="category" class="mb-2 block text-sm font-bold">{{ t("الفئة", "Category", ui_lang) }}</label>
+      <select id="category" name="category" data-searchable-select data-search-placeholder="{{ t('ابحث عن فئة', 'Search category', ui_lang) }}" data-empty-label="{{ t('لا توجد نتائج', 'No matches found', ui_lang) }}" class="h-12 w-full rounded-xl border-slate-200 bg-slate-50 px-4 dark:border-slate-700 dark:bg-slate-800">
         <option value="">{{ t("جميع الفئات", "All categories", ui_lang) }}</option>
         {% for category_option in categories %}
-          <option value="{{ category_option }}" {% if category == category_option %}selected{% endif %}>{{ category_option }}</option>
+          <option value="{{ category_option }}" {% if category == category_option %}selected{% endif %}>{{ tr_category(category_option, ui_lang) }}</option>
         {% endfor %}
       </select>
     </div>
     <div class="flex items-end">
-      <button class="h-12 w-full rounded-xl bg-primary px-5 font-bold text-white hover:bg-primary/90" type="submit">{{ t("طھطµظپظٹط©", "Filter", ui_lang) }}</button>
+      <button class="h-12 w-full rounded-xl bg-primary px-5 font-bold text-white hover:bg-primary/90" type="submit">{{ t("تصفية", "Filter", ui_lang) }}</button>
     </div>
   </form>
 
@@ -45,13 +45,14 @@
         <a href="{{ url_for('main.destination_detail', destination_id=destination.id, lang=ui_lang) }}" class="group block overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-700 dark:bg-slate-800/50">
           <div class="relative h-56 overflow-hidden">
             <img class="h-full w-full object-cover transition duration-500 group-hover:scale-105" src="{{ destination_image(destination) }}" alt="{{ destination.name }}">
-            <div class="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-primary">{{ destination.category }}</div>
+            <div class="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-primary">{{ tr_category(destination.category, ui_lang) }}</div>
           </div>
           <div class="space-y-2 p-5">
-            <h3 class="text-lg font-bold group-hover:text-primary">{{ destination.name }}</h3>
-            <p class="text-sm text-slate-500">{{ destination.city }}</p>
+            <h3 class="text-lg font-bold group-hover:text-primary">{{ tr_destination(destination.name, ui_lang) }}</h3>
+            <p class="text-sm text-slate-500">{{ tr_city(destination.city, ui_lang) }}</p>
             {% if destination.description %}
-              <p class="line-clamp-2 text-sm text-slate-500">{{ destination.description[:120] }}{% if destination.description|length > 120 %}...{% endif %}</p>
+              {% set translated_description = tr_description(destination.description, ui_lang) %}
+              <p class="line-clamp-2 text-sm text-slate-500">{{ translated_description[:120] }}{% if translated_description|length > 120 %}...{% endif %}</p>
             {% endif %}
             {% if destination.estimated_cost is not none %}
               <p class="text-sm font-bold text-primary">{{ destination.estimated_cost }} SAR</p>
@@ -62,7 +63,7 @@
     </div>
   {% else %}
     <div class="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500 dark:border-slate-700 dark:bg-slate-800/40">
-      {{ t("ظ„ط§ طھظˆط¬ط¯ ظ†طھط§ط¦ط¬ ظ…ط·ط§ط¨ظ‚ط©.", "No matching results found.", ui_lang) }}
+      {{ t("لا توجد نتائج مطابقة.", "No matching results found.", ui_lang) }}
     </div>
   {% endif %}
 </section>

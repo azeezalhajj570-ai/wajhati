@@ -21,6 +21,9 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     preferred_language = db.Column(db.String(20), default="ar", nullable=False)
+    age_range = db.Column(db.String(40), nullable=True)
+    gender = db.Column(db.String(40), nullable=True)
+    favorite_tags = db.Column(db.String(255), nullable=False, default="")
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     itineraries = db.relationship("Itinerary", backref="user", lazy=True, cascade="all, delete-orphan")
@@ -32,6 +35,9 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    def favorite_tags_list(self):
+        return [item.strip() for item in (self.favorite_tags or "").split(",") if item.strip()]
 
 
 @login_manager.user_loader

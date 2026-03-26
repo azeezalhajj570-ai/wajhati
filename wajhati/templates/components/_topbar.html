@@ -40,6 +40,7 @@
             class="absolute {% if ui_lang == 'ar' %}left-0{% else %}right-0{% endif %} top-12 z-50 hidden min-w-[170px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
             data-profile-menu
             role="menu">
+            <a class="block px-4 py-3 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800" href="{{ url_for('main.profile', lang=ui_lang) }}">{{ t('الملف الشخصي', 'Profile', ui_lang) }}</a>
             <a class="block px-4 py-3 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800" href="{{ url_for('main.my_itineraries', lang=ui_lang) }}">{{ t('رحلاتي', 'My Trips', ui_lang) }}</a>
             <a class="block px-4 py-3 text-sm font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" href="{{ url_for('auth.logout') }}">{{ t('تسجيل الخروج', 'Logout', ui_lang) }}</a>
           </div>

@@ -8,11 +8,11 @@
       <div class="h-32 w-full rounded-lg bg-cover bg-center md:w-48" style="background-image:url('{{ city_image(itinerary.destination_city) }}');"></div>
       <div class="flex-1">
         <p class="mb-1 text-sm font-bold uppercase tracking-wider text-primary">{{ t("خطة مقترحة بالذكاء الاصطناعي", "AI suggested itinerary", ui_lang) }}</p>
-        <h1 class="mb-2 text-2xl font-bold">{{ itinerary.destination_city }} {{ t("رحلة", "Trip", ui_lang) }} #{{ itinerary.id }}</h1>
+        <h1 class="mb-2 text-2xl font-bold">{{ tr_city(itinerary.destination_city, ui_lang) }} {{ t("رحلة", "Trip", ui_lang) }} #{{ itinerary.id }}</h1>
         <div class="flex flex-wrap gap-4 text-sm text-slate-500">
           <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">calendar_today</span>{{ itinerary.duration_days }} {{ t("أيام", "days", ui_lang) }}</span>
           <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">payments</span>{{ itinerary.budget }} SAR</span>
-          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">location_on</span>{{ itinerary.destination_city }}</span>
+          <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">location_on</span>{{ tr_city(itinerary.destination_city, ui_lang) }}</span>
           <span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">interests</span>{{ itinerary.interests or t("بدون اهتمامات محددة", "No specific interests", ui_lang) }}</span>
         </div>
       </div>

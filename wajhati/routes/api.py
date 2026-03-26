@@ -16,6 +16,16 @@ def _parse_interests(raw_value):
     return [item.strip() for item in str(raw_value).split(",") if item.strip()]
 
 
+def _current_user_profile_context():
+    if not current_user.is_authenticated:
+        return {"age_range": "", "gender": "", "favorite_tags": []}
+    return {
+        "age_range": current_user.age_range or "",
+        "gender": current_user.gender or "",
+        "favorite_tags": current_user.favorite_tags_list(),
+    }
+
+
 @api_bp.get("/health")
 def health():
     return jsonify({"status": "ok", "service": "wajhati-api"})
@@ -75,11 +85,12 @@ def api_generate_itinerary():
         return jsonify({"error": "trip_type is invalid"}), 400
 
     destinations = Destination.query.all()
-    matched = match_destinations(destinations, city=city, budget=budget, interests=interests)
+    profile_context = _current_user_profile_context()
+    matched = match_destinations(destinations, city=city, budget=budget, interests=interests, profile_context=profile_context)
     if not matched:
         return jsonify({"error": "No destinations matched the selected preferences"}), 404
 
-    generated = generate_itinerary(matched, duration_days, budget, trip_type, interests)
+    generated = generate_itinerary(matched, duration_days, budget, trip_type, interests, profile_context=profile_context)
     if not generated["items"]:
         return jsonify({"error": "Unable to generate itinerary items"}), 422
 
@@ -89,6 +100,7 @@ def api_generate_itinerary():
         "budget": budget,
         "trip_type": trip_type,
         "interests": interests,
+        "profile_context": profile_context,
         "estimated_total_cost": generated["estimated_total_cost"],
         "items": generated["items"],
     }
