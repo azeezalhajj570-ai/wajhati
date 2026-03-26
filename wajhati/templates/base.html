@@ -49,6 +49,48 @@
     </div>
     <script>
       (() => {
+        let lockedScrollY = 0;
+
+        const lockBodyScroll = () => {
+          lockedScrollY = window.scrollY || window.pageYOffset || 0;
+          document.body.style.position = "fixed";
+          document.body.style.top = `-${lockedScrollY}px`;
+          document.body.style.left = "0";
+          document.body.style.right = "0";
+          document.body.style.width = "100%";
+          document.body.style.overflow = "hidden";
+        };
+
+        const unlockBodyScroll = () => {
+          document.body.style.position = "";
+          document.body.style.top = "";
+          document.body.style.left = "";
+          document.body.style.right = "";
+          document.body.style.width = "";
+          document.body.style.overflow = "";
+          window.scrollTo(0, lockedScrollY);
+        };
+
+        const closeDrawerModal = (modal) => {
+          const drawerPanel = modal.querySelector("[data-mobile-drawer-panel]");
+          if (!drawerPanel) {
+            modal.hidden = true;
+            document.body.classList.remove("modal-open");
+            unlockBodyScroll();
+            return;
+          }
+
+          modal.classList.remove("opacity-100");
+          modal.classList.add("opacity-0");
+          drawerPanel.classList.remove("translate-x-0");
+          drawerPanel.classList.add(document.documentElement.dir === "rtl" ? "translate-x-full" : "-translate-x-full");
+          window.setTimeout(() => {
+            modal.hidden = true;
+            document.body.classList.remove("modal-open");
+            unlockBodyScroll();
+          }, 300);
+        };
+
         const tabs = document.querySelectorAll("[data-tabs]");
         tabs.forEach((group) => {
           const buttons = group.querySelectorAll("[role='tab']");
@@ -96,20 +138,28 @@
             if (modal) {
               modal.hidden = false;
               document.body.classList.add("modal-open");
+              lockBodyScroll();
+              const drawerPanel = modal.querySelector("[data-mobile-drawer-panel]");
+              if (drawerPanel) {
+                requestAnimationFrame(() => {
+                  modal.classList.remove("opacity-0");
+                  modal.classList.add("opacity-100");
+                  drawerPanel.classList.remove("-translate-x-full", "translate-x-full");
+                  drawerPanel.classList.add("translate-x-0");
+                });
+              }
             }
           }
 
           if (closeTarget) {
             const modal = closeTarget.closest(".modal-backdrop");
             if (modal) {
-              modal.hidden = true;
-              document.body.classList.remove("modal-open");
+              closeDrawerModal(modal);
             }
           }
 
           if (event.target.classList && event.target.classList.contains("modal-backdrop")) {
-            event.target.hidden = true;
-            document.body.classList.remove("modal-open");
+            closeDrawerModal(event.target);
           }
 
           if (flashCloseTarget) {

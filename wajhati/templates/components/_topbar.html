@@ -2,6 +2,9 @@
 <header class="sticky top-0 z-50 w-full border-b border-slate-200 bg-background-light/90 backdrop-blur-md dark:border-slate-800 dark:bg-background-dark/80">
   <div class="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-6">
     <div class="flex items-center gap-8">
+      <button type="button" class="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-700 lg:hidden dark:border-slate-700 dark:text-slate-200" data-modal-open="mobile-nav" aria-label="{{ t('فتح القائمة', 'Open menu', ui_lang) }}">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
       <a href="{{ url_for('main.index', lang=ui_lang) }}" class="flex items-center gap-3">
         <div class="rounded-xl bg-primary p-2 text-white">
           <span class="material-symbols-outlined">travel_explore</span>
@@ -49,3 +52,48 @@
     </div>
   </div>
 </header>
+
+<div id="mobile-nav" class="modal-backdrop fixed inset-0 z-[80] bg-slate-950/45 opacity-0 transition-opacity duration-300 lg:hidden" hidden>
+  <aside class="{% if ui_lang == 'ar' %}ml-auto translate-x-full{% else %}mr-auto -translate-x-full{% endif %} flex h-full w-[88vw] max-w-sm flex-col bg-white shadow-2xl transition-transform duration-300 dark:bg-slate-950" data-mobile-drawer-panel>
+    <div class="flex items-center justify-between border-b border-slate-200 px-5 py-5 dark:border-slate-800">
+      <div class="flex items-center gap-3">
+        <div class="rounded-xl bg-primary p-2 text-white">
+          <span class="material-symbols-outlined">travel_explore</span>
+        </div>
+        <div>
+          <p class="text-lg font-black">{{ t('وجهتي', 'Wajhati', ui_lang) }}</p>
+          <p class="text-xs text-slate-500">{{ t('التنقل السريع', 'Quick navigation', ui_lang) }}</p>
+        </div>
+      </div>
+      <button type="button" class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700" data-modal-close aria-label="{{ t('إغلاق القائمة', 'Close menu', ui_lang) }}">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <nav class="flex-1 space-y-2 overflow-y-auto px-4 py-4">
+      <a class="block rounded-2xl px-4 py-3 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-900" href="{{ url_for('main.index', lang=ui_lang) }}">{{ t('الرئيسية', 'Home', ui_lang) }}</a>
+      <a class="block rounded-2xl px-4 py-3 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-900" href="{{ url_for('main.destinations', lang=ui_lang) }}">{{ t('الوجهات', 'Destinations', ui_lang) }}</a>
+      <a class="block rounded-2xl px-4 py-3 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-900" href="{{ url_for('main.create_itinerary', lang=ui_lang) }}">{{ t('التخطيط', 'Planning', ui_lang) }}</a>
+      <a class="block rounded-2xl px-4 py-3 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-900" href="{{ url_for('main.map_screen', lang=ui_lang) }}">{{ t('الخريطة', 'Map', ui_lang) }}</a>
+      {% if current_user.is_authenticated %}
+        <a class="block rounded-2xl px-4 py-3 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-900" href="{{ url_for('main.my_itineraries', lang=ui_lang) }}">{{ t('رحلاتي', 'My Trips', ui_lang) }}</a>
+        <a class="block rounded-2xl px-4 py-3 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-900" href="{{ url_for('main.profile', lang=ui_lang) }}">{{ t('الملف الشخصي', 'Profile', ui_lang) }}</a>
+      {% endif %}
+    </nav>
+
+    <div class="space-y-3 border-t border-slate-200 px-4 py-4 dark:border-slate-800">
+      <div class="flex gap-2">
+        <a class="flex-1 rounded-xl border px-3 py-3 text-center text-xs font-bold {% if ui_lang == 'ar' %}border-primary text-primary{% else %}border-slate-200{% endif %}" href="{{ request.path }}?lang=ar">AR</a>
+        <a class="flex-1 rounded-xl border px-3 py-3 text-center text-xs font-bold {% if ui_lang == 'en' %}border-primary text-primary{% else %}border-slate-200{% endif %}" href="{{ request.path }}?lang=en">EN</a>
+      </div>
+      {% if current_user.is_authenticated %}
+        <a class="block rounded-2xl bg-rose-50 px-4 py-3 text-sm font-bold text-rose-600 dark:bg-rose-950/30" href="{{ url_for('auth.logout') }}">{{ t('تسجيل الخروج', 'Logout', ui_lang) }}</a>
+      {% else %}
+        <div class="grid grid-cols-2 gap-2">
+          <a class="rounded-xl border border-slate-200 px-3 py-3 text-center text-sm font-semibold dark:border-slate-700" href="{{ url_for('auth.login', lang=ui_lang) }}">{{ t('دخول', 'Login', ui_lang) }}</a>
+          <a class="rounded-xl bg-primary px-3 py-3 text-center text-sm font-semibold text-white" href="{{ url_for('auth.register', lang=ui_lang) }}">{{ t('إنشاء حساب', 'Register', ui_lang) }}</a>
+        </div>
+      {% endif %}
+    </div>
+  </aside>
+</div>
