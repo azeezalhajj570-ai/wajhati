@@ -42,7 +42,7 @@
       {% if map_destinations %}
         {% for destination in map_destinations %}
           <article
-            class="map-card rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:border-primary/40 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60"
+            class="map-card cursor-pointer rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:border-primary/40 hover:bg-white dark:border-slate-700 dark:bg-slate-800/60"
             data-lat="{{ destination.latitude }}"
             data-lng="{{ destination.longitude }}"
             data-destination-id="{{ destination.id }}">

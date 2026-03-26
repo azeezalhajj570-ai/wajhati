@@ -27,7 +27,7 @@
         </div>
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {% for destination in destinations[:4] %}
-            <a href="{{ url_for('main.destination_detail', destination_id=destination.id, lang=ui_lang) }}" class="group block">
+            <a href="{{ url_for('main.destination_detail', destination_id=destination.id, lang=ui_lang) }}" class="group block cursor-pointer">
               <div class="relative mb-3 h-64 overflow-hidden rounded-2xl">
                 <img class="h-full w-full object-cover transition duration-500 group-hover:scale-105" src="{{ destination_image(destination) }}" alt="{{ destination.name }}">
                 <div class="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-primary">{{ tr_category(destination.category, ui_lang) }}</div>
@@ -54,7 +54,7 @@
         {% if current_user.is_authenticated and recent_itineraries %}
           <div class="space-y-4">
             {% for itinerary in recent_itineraries %}
-              <a href="{{ url_for('main.itinerary_detail', itinerary_id=itinerary.id, lang=ui_lang) }}" class="flex flex-col gap-5 rounded-2xl border border-slate-200 p-4 transition hover:border-primary/40 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 md:flex-row md:items-center">
+              <a href="{{ url_for('main.itinerary_detail', itinerary_id=itinerary.id, lang=ui_lang) }}" class="flex cursor-pointer flex-col gap-5 rounded-2xl border border-slate-200 p-4 transition hover:border-primary/40 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 md:flex-row md:items-center">
                 <img class="h-28 w-full rounded-2xl object-cover md:w-32" src="{{ city_image(itinerary.destination_city) }}" alt="{{ tr_city(itinerary.destination_city, ui_lang) }}">
                 <div class="flex-1">
                   <p class="text-xs font-bold uppercase tracking-wider text-primary">{{ itinerary.trip_type }}</p>
@@ -105,7 +105,7 @@
         {% endif %}
       </section>
 
-      <a href="{{ url_for('main.map_screen', lang=ui_lang) }}" class="group relative block h-64 overflow-hidden rounded-3xl">
+      <a href="{{ url_for('main.map_screen', lang=ui_lang) }}" class="group relative block h-64 cursor-pointer overflow-hidden rounded-3xl">
         <img class="h-full w-full object-cover opacity-60 transition duration-500 group-hover:opacity-100" src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1000&q=80" alt="Map">
         <div class="absolute inset-0 grid place-content-center bg-primary/75 p-6 text-center text-white">
           <span class="material-symbols-outlined mb-2 text-4xl">map</span>
