@@ -18,6 +18,9 @@
         <a class="text-sm font-semibold hover:text-primary" href="{{ url_for('main.map_screen', lang=ui_lang) }}">{{ t('الخريطة', 'Map', ui_lang) }}</a>
         {% if current_user.is_authenticated %}
           <a class="text-sm font-semibold hover:text-primary" href="{{ url_for('main.my_itineraries', lang=ui_lang) }}">{{ t('رحلاتي', 'My Trips', ui_lang) }}</a>
+          {% if current_user.is_admin %}
+            <a class="text-sm font-semibold hover:text-primary" href="{{ url_for('main.admin_destinations', lang=ui_lang) }}">{{ t('الإدارة', 'Admin', ui_lang) }}</a>
+          {% endif %}
         {% endif %}
       </nav>
     </div>
@@ -43,6 +46,9 @@
             class="absolute {% if ui_lang == 'ar' %}left-0{% else %}right-0{% endif %} top-12 z-50 hidden min-w-[170px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900"
             data-profile-menu
             role="menu">
+            {% if current_user.is_admin %}
+              <a class="block px-4 py-3 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800" href="{{ url_for('main.admin_destinations', lang=ui_lang) }}">{{ t('لوحة الإدارة', 'Admin Dashboard', ui_lang) }}</a>
+            {% endif %}
             <a class="block px-4 py-3 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800" href="{{ url_for('main.profile', lang=ui_lang) }}">{{ t('الملف الشخصي', 'Profile', ui_lang) }}</a>
             <a class="block px-4 py-3 text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800" href="{{ url_for('main.my_itineraries', lang=ui_lang) }}">{{ t('رحلاتي', 'My Trips', ui_lang) }}</a>
             <a class="block px-4 py-3 text-sm font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20" href="{{ url_for('auth.logout') }}">{{ t('تسجيل الخروج', 'Logout', ui_lang) }}</a>
@@ -78,6 +84,9 @@
       {% if current_user.is_authenticated %}
         <a class="block rounded-2xl px-4 py-3 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-900" href="{{ url_for('main.my_itineraries', lang=ui_lang) }}">{{ t('رحلاتي', 'My Trips', ui_lang) }}</a>
         <a class="block rounded-2xl px-4 py-3 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-900" href="{{ url_for('main.profile', lang=ui_lang) }}">{{ t('الملف الشخصي', 'Profile', ui_lang) }}</a>
+        {% if current_user.is_admin %}
+          <a class="block rounded-2xl px-4 py-3 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-900" href="{{ url_for('main.admin_destinations', lang=ui_lang) }}">{{ t('لوحة الإدارة', 'Admin Dashboard', ui_lang) }}</a>
+        {% endif %}
       {% endif %}
     </nav>
 

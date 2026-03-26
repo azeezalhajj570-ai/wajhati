@@ -1,3 +1,4 @@
+import os
 from urllib.parse import parse_qs, urljoin, urlparse
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
@@ -45,7 +46,9 @@ def register():
             flash("البريد الإلكتروني مسجل مسبقًا.", "warning")
             return render_template("register.html")
 
-        user = User(name=name, email=email)
+        admin_email = os.environ.get("ADMIN_EMAIL", "").strip().lower()
+        is_first_user = User.query.count() == 0
+        user = User(name=name, email=email, is_admin=is_first_user or (admin_email and email == admin_email))
         user.set_password(password)
         db.session.add(user)
         db.session.commit()

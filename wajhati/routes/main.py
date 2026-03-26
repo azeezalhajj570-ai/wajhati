@@ -1,6 +1,6 @@
 from urllib.parse import parse_qs, urlparse
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from wajhati import db
@@ -35,6 +35,7 @@ PROFILE_TAG_OPTIONS = (
     "romantic",
     "leisure",
 )
+DESTINATION_SEASONS = ("all", "winter", "spring", "summer", "autumn")
 
 
 def _get_ui_lang():
@@ -52,6 +53,13 @@ def _parse_interests(raw_value):
 def _ui_text(ar, en, lang=None):
     lang = lang or _get_ui_lang()
     return ar if lang == "ar" else en
+
+
+def _require_admin():
+    if not current_user.is_authenticated:
+        abort(401)
+    if not getattr(current_user, "is_admin", False):
+        abort(403)
 
 
 def _parse_profile_tags(raw_values, manual_value=""):
@@ -121,6 +129,78 @@ def _build_itinerary_form_data(form=None):
         "budget": str(form.get("budget", "2500")).strip() or "2500",
         "trip_type": str(form.get("trip_type", "leisure")).strip().lower() or "leisure",
         "interests": str(form.get("interests", "")).strip(),
+    }
+
+
+def _build_destination_form_data(form=None):
+    form = form or {}
+    return {
+        "name": str(form.get("name", "")).strip(),
+        "city": str(form.get("city", "")).strip(),
+        "category": str(form.get("category", "")).strip().lower(),
+        "description": str(form.get("description", "")).strip(),
+        "estimated_cost": str(form.get("estimated_cost", "")).strip(),
+        "latitude": str(form.get("latitude", "")).strip(),
+        "longitude": str(form.get("longitude", "")).strip(),
+        "season": str(form.get("season", "all")).strip().lower() or "all",
+    }
+
+
+def _validate_destination_form(form_data, available_cities):
+    errors = []
+
+    if not form_data["name"]:
+        errors.append(("يرجى إدخال اسم الوجهة.", "Please enter a destination name."))
+
+    city = form_data["city"]
+    if not city:
+        errors.append(("يرجى اختيار مدينة.", "Please choose a city."))
+    elif city not in available_cities:
+        errors.append(("يرجى اختيار مدينة من القائمة المتاحة.", "Please choose a city from the available list."))
+
+    category = form_data["category"]
+    if category not in {"cultural", "leisure", "adventure", "nature"}:
+        errors.append(("يرجى اختيار فئة صحيحة.", "Please choose a valid category."))
+
+    if not form_data["description"]:
+        errors.append(("يرجى إدخال وصف الوجهة.", "Please enter a destination description."))
+
+    try:
+        estimated_cost = float(form_data["estimated_cost"])
+        if estimated_cost < 0:
+            errors.append(("يجب أن تكون التكلفة التقديرية 0 أو أكثر.", "Estimated cost must be 0 or greater."))
+    except ValueError:
+        estimated_cost = 0.0
+        errors.append(("يرجى إدخال تكلفة تقديرية صالحة.", "Please enter a valid estimated cost."))
+
+    latitude = None
+    if form_data["latitude"]:
+        try:
+            latitude = float(form_data["latitude"])
+        except ValueError:
+            errors.append(("يرجى إدخال خط عرض صالح.", "Please enter a valid latitude."))
+
+    longitude = None
+    if form_data["longitude"]:
+        try:
+            longitude = float(form_data["longitude"])
+        except ValueError:
+            errors.append(("يرجى إدخال خط طول صالح.", "Please enter a valid longitude."))
+
+    season = form_data["season"]
+    if season not in DESTINATION_SEASONS:
+        errors.append(("يرجى اختيار موسم صالح.", "Please choose a valid season."))
+
+    return {
+        "name": form_data["name"],
+        "city": city,
+        "category": category,
+        "description": form_data["description"],
+        "estimated_cost": estimated_cost,
+        "latitude": latitude,
+        "longitude": longitude,
+        "season": season,
+        "errors": errors,
     }
 
 
@@ -209,6 +289,44 @@ def profile():
         age_range_options=AGE_RANGE_OPTIONS,
         gender_options=GENDER_OPTIONS,
         profile_tag_options=PROFILE_TAG_OPTIONS,
+    )
+
+
+@main_bp.route("/admin/destinations", methods=["GET", "POST"])
+@login_required
+def admin_destinations():
+    _require_admin()
+    lang = _get_ui_lang()
+    cities = _available_cities()
+    form_data = _build_destination_form_data(request.form if request.method == "POST" else None)
+
+    if request.method == "POST":
+        parsed = _validate_destination_form(form_data, cities)
+        for error in parsed["errors"]:
+            flash(_ui_text(error[0], error[1], lang), "danger")
+        if not parsed["errors"]:
+            destination = Destination(
+                name=parsed["name"],
+                city=parsed["city"],
+                category=parsed["category"],
+                description=parsed["description"],
+                estimated_cost=parsed["estimated_cost"],
+                latitude=parsed["latitude"],
+                longitude=parsed["longitude"],
+                season=parsed["season"],
+            )
+            db.session.add(destination)
+            db.session.commit()
+            flash(_ui_text("تمت إضافة الوجهة بنجاح.", "Destination added successfully.", lang), "success")
+            return redirect(url_for("main.admin_destinations", lang=lang))
+
+    destinations = Destination.query.order_by(Destination.created_at.desc()).all()
+    return render_template(
+        "admin_destinations.html",
+        destinations=destinations,
+        form_data=form_data,
+        cities=cities,
+        seasons=DESTINATION_SEASONS,
     )
 
 
