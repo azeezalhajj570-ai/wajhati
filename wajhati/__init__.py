@@ -6,7 +6,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import inspect, text
 
 from config import Config
-from wajhati.models import User
 from wajhati.translations import tr_category, tr_city, tr_description, tr_destination, tr_interest_tag, tr_season
 
 db = SQLAlchemy()
@@ -69,6 +68,8 @@ def _ensure_user_profile_columns():
 
 
 def _ensure_admin_user():
+    from wajhati.models import User
+
     admin_email = os.environ.get("ADMIN_EMAIL", "").strip().lower()
     updated = False
 
