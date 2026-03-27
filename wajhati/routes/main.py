@@ -463,10 +463,48 @@ def admin_attractions():
     )
 
 
-@main_bp.route("/admin/users", methods=["GET"])
+@main_bp.route("/admin/users", methods=["GET", "POST"])
 @login_required
 def admin_users():
     _require_admin()
+    lang = _get_ui_lang()
+
+    if request.method == "POST":
+        action = str(request.form.get("action", "")).strip().lower()
+        try:
+            user_id = int(request.form.get("user_id", "0"))
+        except ValueError:
+            user_id = 0
+
+        managed_user = User.query.get(user_id) if user_id else None
+        if not managed_user:
+            flash(_ui_text("تعذر العثور على المستخدم المطلوب.", "The requested user could not be found.", lang), "danger")
+            return redirect(url_for("main.admin_users", lang=lang))
+
+        if action == "make_admin":
+            if managed_user.is_admin:
+                flash(_ui_text("المستخدم مشرف بالفعل.", "This user is already an admin.", lang), "warning")
+            else:
+                managed_user.is_admin = True
+                db.session.commit()
+                flash(_ui_text("تمت ترقية المستخدم إلى مشرف.", "User promoted to admin successfully.", lang), "success")
+        elif action == "remove_admin":
+            admin_count = User.query.filter_by(is_admin=True).count()
+            if managed_user.id == current_user.id:
+                flash(_ui_text("لا يمكنك إزالة صلاحية الإدارة من حسابك الحالي.", "You cannot remove admin access from your current account.", lang), "danger")
+            elif not managed_user.is_admin:
+                flash(_ui_text("هذا المستخدم ليس مشرفًا.", "This user is not an admin.", lang), "warning")
+            elif admin_count <= 1:
+                flash(_ui_text("يجب أن يبقى هناك مشرف واحد على الأقل.", "At least one admin must remain.", lang), "danger")
+            else:
+                managed_user.is_admin = False
+                db.session.commit()
+                flash(_ui_text("تمت إزالة صلاحية الإدارة من المستخدم.", "Admin access removed from the user.", lang), "success")
+        else:
+            flash(_ui_text("إجراء غير صالح.", "Invalid action.", lang), "danger")
+
+        return redirect(url_for("main.admin_users", lang=lang))
+
     users = User.query.order_by(User.created_at.desc()).all()
     return render_template("admin_users.html", users=users)
 

@@ -5,25 +5,57 @@
   <div class="mb-10 rounded-3xl bg-slate-900 p-8 text-white">
     <p class="mb-2 text-xs font-bold uppercase tracking-widest text-primary">{{ t("لوحة الإدارة", "Admin Dashboard", ui_lang) }}</p>
     <h1 class="text-4xl font-black">{{ t("إدارة المستخدمين", "Manage Users", ui_lang) }}</h1>
-    <p class="mt-3 max-w-3xl text-slate-200">{{ t("عرض المستخدمين الحاليين وصلاحياتهم وبياناتهم الأساسية.", "Review current users, their privileges, and basic metadata.", ui_lang) }}</p>
+    <p class="mt-3 max-w-3xl text-slate-200">{{ t("عرض المستخدمين الحاليين وإدارة صلاحيات الإدارة وبياناتهم الأساسية.", "Review users, manage admin privileges, and inspect their basic metadata.", ui_lang) }}</p>
   </div>
 
   <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-    <div class="grid grid-cols-[1.4fr_1.6fr_0.8fr_0.8fr_1fr] gap-4 border-b border-slate-200 px-6 py-4 text-sm font-bold text-slate-500 dark:border-slate-800">
+    <div class="grid grid-cols-[1.1fr_1.5fr_0.8fr_0.8fr_1fr_1.1fr] gap-4 border-b border-slate-200 px-6 py-4 text-sm font-bold text-slate-500 dark:border-slate-800">
       <span>{{ t("الاسم", "Name", ui_lang) }}</span>
       <span>{{ t("البريد الإلكتروني", "Email", ui_lang) }}</span>
       <span>{{ t("مشرف", "Admin", ui_lang) }}</span>
       <span>{{ t("النوع", "Gender", ui_lang) }}</span>
       <span>{{ t("تاريخ الإنشاء", "Created At", ui_lang) }}</span>
+      <span>{{ t("الإجراءات", "Actions", ui_lang) }}</span>
     </div>
     <div class="divide-y divide-slate-200 dark:divide-slate-800">
       {% for user in users %}
-        <div class="grid grid-cols-[1.4fr_1.6fr_0.8fr_0.8fr_1fr] gap-4 px-6 py-4 text-sm">
-          <span class="font-semibold">{{ user.name }}</span>
+        <div class="grid grid-cols-[1.1fr_1.5fr_0.8fr_0.8fr_1fr_1.1fr] gap-4 px-6 py-4 text-sm">
+          <div>
+            <span class="font-semibold">{{ user.name }}</span>
+            {% if user.id == current_user.id %}
+              <span class="mt-2 inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">{{ t("أنت", "You", ui_lang) }}</span>
+            {% endif %}
+          </div>
           <span class="text-slate-500">{{ user.email }}</span>
-          <span>{{ t("نعم", "Yes", ui_lang) if user.is_admin else t("لا", "No", ui_lang) }}</span>
+          <span>
+            {% if user.is_admin %}
+              <span class="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">{{ t("نعم", "Yes", ui_lang) }}</span>
+            {% else %}
+              <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ t("لا", "No", ui_lang) }}</span>
+            {% endif %}
+          </span>
           <span>{{ user.gender or "-" }}</span>
           <span class="text-slate-500">{{ user.created_at.strftime("%Y-%m-%d") }}</span>
+          <div>
+            <form method="post" class="inline">
+              <input type="hidden" name="lang" value="{{ ui_lang }}">
+              <input type="hidden" name="user_id" value="{{ user.id }}">
+              {% if user.is_admin %}
+                <input type="hidden" name="action" value="remove_admin">
+                <button
+                  type="submit"
+                  class="rounded-xl border border-rose-200 px-3 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-rose-900/60 dark:text-rose-300 dark:hover:bg-rose-950/30"
+                  {% if user.id == current_user.id %}disabled title="{{ t('لا يمكن إزالة صلاحية الإدارة من حسابك الحالي.', 'You cannot remove admin access from your current account.', ui_lang) }}"{% endif %}>
+                  {{ t("إزالة الإدارة", "Remove Admin", ui_lang) }}
+                </button>
+              {% else %}
+                <input type="hidden" name="action" value="make_admin">
+                <button type="submit" class="rounded-xl border border-emerald-200 px-3 py-2 text-xs font-bold text-emerald-700 transition hover:bg-emerald-50 dark:border-emerald-900/60 dark:text-emerald-300 dark:hover:bg-emerald-950/30">
+                  {{ t("تعيين كمشرف", "Make Admin", ui_lang) }}
+                </button>
+              {% endif %}
+            </form>
+          </div>
         </div>
       {% else %}
         <div class="px-6 py-10 text-center text-slate-500">{{ t("لا يوجد مستخدمون.", "No users found.", ui_lang) }}</div>
