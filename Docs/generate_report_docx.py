@@ -1,5 +1,6 @@
 import re
 import shutil
+import sys
 import tempfile
 import zipfile
 from pathlib import Path
@@ -7,9 +8,9 @@ from xml.sax.saxutils import escape
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE_MD = ROOT / "Docs" / "applied_project_report_sample_aligned.md"
 TEMPLATE_DOCX = ROOT / "Project Report Sample.docx"
-OUTPUT_DOCX = ROOT / "Project Report Wajhati Sample Aligned.docx"
+DEFAULT_SOURCE_MD = ROOT / "Docs" / "applied_project_report_sample_aligned.md"
+DEFAULT_OUTPUT_DOCX = ROOT / "Project Report Wajhati Sample Aligned.docx"
 
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 
@@ -142,7 +143,10 @@ def build_document_body(markdown_text):
 
 
 def main():
-    markdown_text = SOURCE_MD.read_text(encoding="utf-8")
+    source_md = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_SOURCE_MD
+    output_docx = Path(sys.argv[2]) if len(sys.argv) > 2 else DEFAULT_OUTPUT_DOCX
+
+    markdown_text = source_md.read_text(encoding="utf-8")
     body_xml = build_document_body(markdown_text)
     document_xml = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
@@ -162,9 +166,9 @@ def main():
             target.writestr(item, source.read(item.filename))
         target.writestr("word/document.xml", document_xml)
 
-    shutil.move(str(temp_path), OUTPUT_DOCX)
+    shutil.move(str(temp_path), output_docx)
 
-    print(OUTPUT_DOCX)
+    print(output_docx)
 
 
 if __name__ == "__main__":
