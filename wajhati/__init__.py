@@ -38,10 +38,11 @@ def create_app(config_class=Config):
     app.register_blueprint(api_bp, url_prefix="/api")
 
     with app.app_context():
-        from wajhati.seed import seed_demo_destinations
+        from wajhati.seed import seed_default_users, seed_demo_destinations
 
         db.create_all()
         _ensure_user_profile_columns()
+        seed_default_users()
         _ensure_admin_user()
         seed_demo_destinations()
 

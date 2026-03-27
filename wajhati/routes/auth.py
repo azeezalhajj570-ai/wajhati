@@ -2,6 +2,7 @@ import os
 from urllib.parse import parse_qs, urljoin, urlparse
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
+from sqlalchemy import or_
 from flask_login import current_user, login_required, login_user, logout_user
 
 from wajhati import db
@@ -70,9 +71,12 @@ def login():
         return redirect(url_for("main.index"))
 
     if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
+        identifier = request.form.get("email", "").strip()
         password = request.form.get("password", "")
-        user = User.query.filter_by(email=email).first()
+        normalized_identifier = identifier.lower()
+        user = User.query.filter(
+            or_(User.email == normalized_identifier, User.name == identifier)
+        ).first()
 
         if user and user.check_password(password):
             login_user(user)

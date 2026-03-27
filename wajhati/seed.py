@@ -1,5 +1,5 @@
 from wajhati import db
-from wajhati.models import Destination
+from wajhati.models import Destination, User
 
 
 SAMPLE_DESTINATIONS = [
@@ -65,6 +65,21 @@ SAMPLE_DESTINATIONS = [
     },
 ]
 
+DEFAULT_USERS = [
+    {
+        "name": "admin",
+        "email": "admin@wajhati.local",
+        "password": "admin",
+        "is_admin": True,
+    },
+    {
+        "name": "user",
+        "email": "user@wajhati.local",
+        "password": "user",
+        "is_admin": False,
+    },
+]
+
 
 def seed_demo_destinations():
     existing_names = {
@@ -85,3 +100,29 @@ def seed_demo_destinations():
     db.session.add_all(pending)
     db.session.commit()
     return len(pending)
+
+
+def seed_default_users():
+    created = False
+
+    for account in DEFAULT_USERS:
+        user = User.query.filter_by(email=account["email"]).first()
+        if user:
+            if account["is_admin"] and not user.is_admin:
+                user.is_admin = True
+                created = True
+            continue
+
+        user = User(
+            name=account["name"],
+            email=account["email"],
+            is_admin=account["is_admin"],
+        )
+        user.set_password(account["password"])
+        db.session.add(user)
+        created = True
+
+    if created:
+        db.session.commit()
+
+    return int(created)
