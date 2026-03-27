@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% from "components/_i18n.html" import t %}
+{% block content %}
+<section class="mx-auto w-full max-w-5xl px-6 py-10">
+  <div class="mb-8 rounded-3xl bg-slate-900 p-8 text-white">
+    <p class="mb-2 text-xs font-bold uppercase tracking-widest text-primary">{{ t("إعدادات الإدارة", "Admin Settings", ui_lang) }}</p>
+    <h1 class="text-4xl font-black">{{ t("إعدادات توصيات Gemini", "Gemini Recommendation Settings", ui_lang) }}</h1>
+    <p class="mt-3 max-w-3xl text-slate-200">{{ t("اضبط المزود والمفتاح والنموذج والتعليمات المستخدمة في إنشاء خطط الرحلات بالذكاء الاصطناعي.", "Manage the provider, API key, model, and prompt used for AI itinerary generation.", ui_lang) }}</p>
+  </div>
+
+  <div class="mb-8 grid gap-4 md:grid-cols-3">
+    <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <p class="text-sm text-slate-500">{{ t("الحالة", "Status", ui_lang) }}</p>
+      <p class="mt-2 text-2xl font-black {% if ai_status_ready %}text-emerald-600{% else %}text-amber-600{% endif %}">
+        {{ t("جاهز", "Ready", ui_lang) if ai_status_ready else t("إعداد غير مكتمل", "Setup Incomplete", ui_lang) }}
+      </p>
+    </div>
+    <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <p class="text-sm text-slate-500">{{ t("المزود", "Provider", ui_lang) }}</p>
+      <p class="mt-2 text-2xl font-black text-primary">{{ saved_settings.provider|upper }}</p>
+    </div>
+    <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <p class="text-sm text-slate-500">{{ t("النموذج", "Model", ui_lang) }}</p>
+      <p class="mt-2 text-2xl font-black text-slate-900 dark:text-white">{{ saved_settings.model }}</p>
+    </div>
+  </div>
+
+  <form method="post" class="space-y-8 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <input type="hidden" name="lang" value="{{ ui_lang }}">
+
+    <section class="grid gap-6 md:grid-cols-2">
+      <label class="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-800">
+        <span class="mb-2 block text-sm font-bold">{{ t("المزود", "Provider", ui_lang) }}</span>
+        <input type="text" value="Gemini" disabled class="h-12 w-full rounded-xl border-slate-200 bg-white px-4 text-sm dark:border-slate-700 dark:bg-slate-900">
+      </label>
+
+      <label class="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-800">
+        <span class="mb-2 block text-sm font-bold">{{ t("اسم النموذج", "Model Name", ui_lang) }}</span>
+        <input type="text" name="model" value="{{ form_data.model }}" placeholder="{{ t('مثال: gemini-2.5-flash', 'Example: gemini-2.5-flash', ui_lang) }}" class="h-12 w-full rounded-xl border-slate-200 bg-white px-4 text-sm dark:border-slate-700 dark:bg-slate-900" required>
+      </label>
+    </section>
+
+    <label class="block rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-800">
+      <span class="mb-2 block text-sm font-bold">{{ t("Gemini API Key", "Gemini API Key", ui_lang) }}</span>
+      <input type="password" name="api_key" value="{{ form_data.api_key }}" placeholder="{{ t('ألصق مفتاح Gemini API هنا', 'Paste the Gemini API key here', ui_lang) }}" class="h-12 w-full rounded-xl border-slate-200 bg-white px-4 text-sm dark:border-slate-700 dark:bg-slate-900">
+      <p class="mt-2 text-xs text-slate-500">{{ t("يتم حفظ المفتاح داخل قاعدة البيانات الحالية كما هو، وهذا مناسب كبداية فقط.", "The key is stored in the current database as plain text, which is acceptable only as a basic starting point.", ui_lang) }}</p>
+    </label>
+
+    <label class="block rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-800">
+      <span class="mb-2 block text-sm font-bold">{{ t("تعليمات النظام", "System Prompt", ui_lang) }}</span>
+      <textarea name="system_prompt" rows="8" class="w-full rounded-2xl border-slate-200 bg-white px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-900">{{ form_data.system_prompt }}</textarea>
+      <p class="mt-2 text-xs text-slate-500">{{ t("استخدم نصًا واضحًا يطلب من النموذج إرجاع JSON صالح فقط.", "Use a clear prompt that instructs the model to return valid JSON only.", ui_lang) }}</p>
+    </label>
+
+    <label class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-800">
+      <input type="checkbox" name="enabled" value="1" {% if form_data.enabled %}checked{% endif %} class="h-5 w-5 rounded border-slate-300 text-primary focus:ring-primary">
+      <span class="text-sm font-bold">{{ t("تفعيل توصيات الذكاء الاصطناعي للمستخدمين", "Enable AI recommendations for users", ui_lang) }}</span>
+    </label>
+
+    <div class="flex flex-wrap gap-3">
+      <button type="submit" class="rounded-2xl bg-primary px-6 py-3 text-sm font-bold text-white hover:bg-primary/90">{{ t("حفظ الإعدادات", "Save Settings", ui_lang) }}</button>
+      <a href="{{ url_for('main.admin_dashboard', lang=ui_lang) }}" class="rounded-2xl border border-slate-200 px-6 py-3 text-sm font-bold dark:border-slate-700">{{ t("العودة للوحة الإدارة", "Back to Admin Dashboard", ui_lang) }}</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

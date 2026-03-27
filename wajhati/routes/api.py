@@ -3,7 +3,7 @@ from flask_login import current_user
 
 from wajhati import db
 from wajhati.models import Destination, Itinerary, ItineraryItem, Review
-from wajhati.services.recommender import generate_itinerary, match_destinations
+from wajhati.services.recommender import generate_itinerary, get_ai_settings, match_destinations
 
 api_bp = Blueprint("api", __name__)
 
@@ -66,8 +66,6 @@ def api_generate_itinerary():
     trip_type = str(payload.get("trip_type", "leisure")).strip().lower()
     interests = _parse_interests(payload.get("interests", []))
 
-    if not city:
-        return jsonify({"error": "destination_city is required"}), 400
     try:
         duration_days = int(payload.get("duration_days", 1))
     except (TypeError, ValueError):
@@ -90,7 +88,15 @@ def api_generate_itinerary():
     if not matched:
         return jsonify({"error": "No destinations matched the selected preferences"}), 404
 
-    generated = generate_itinerary(matched, duration_days, budget, trip_type, interests, profile_context=profile_context)
+    generated = generate_itinerary(
+        matched,
+        duration_days,
+        budget,
+        trip_type,
+        interests,
+        profile_context=profile_context,
+        ai_settings=get_ai_settings(),
+    )
     if not generated["items"]:
         return jsonify({"error": "Unable to generate itinerary items"}), 422
 
@@ -109,7 +115,7 @@ def api_generate_itinerary():
     if save and current_user.is_authenticated:
         itinerary = Itinerary(
             user_id=current_user.id,
-            destination_city=city,
+            destination_city=city or "Flexible",
             trip_type=trip_type,
             duration_days=duration_days,
             budget=budget,

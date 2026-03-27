@@ -113,7 +113,7 @@ def test_submit_review(page: Page) -> None:
 
 
 def test_generate_itinerary_with_valid_input(page: Page) -> None:
-    # A valid itinerary request should redirect to the itinerary detail page and render trip items.
+    # A valid itinerary request should first show a preview, then save only after confirmation.
     register_and_login(page)
     page.goto(f"{BASE_URL}/itinerary/new?lang=en")
 
@@ -124,14 +124,18 @@ def test_generate_itinerary_with_valid_input(page: Page) -> None:
     page.locator("input[name='interests']").fill("cultural, leisure")
     page.locator("button[type='submit']").click()
 
+    expect(page).to_have_url(re.compile(r".*/itinerary/new\?lang=en$"))
+    expect(page.get_by_role("heading", name="Review the plan before saving")).to_be_visible()
+    page.get_by_role("button", name="Confirm and Save Trip").click()
+
     expect(page).to_have_url(re.compile(r".*/itineraries/\d+$"))
     expect(page.locator("[role='alert']")).to_be_visible()
     expect(page.get_by_role("heading", name=re.compile(r"Riyadh Trip #\d+"))).to_be_visible()
     expect(page.get_by_text("Day 1")).to_be_visible()
 
 
-def test_itinerary_missing_city_shows_validation(page: Page) -> None:
-    # Missing city is currently blocked by native browser validation on the required select element.
+def test_itinerary_missing_city_still_generates_preview(page: Page) -> None:
+    # City is optional, so the app should still produce a preview suggestion.
     register_and_login(page)
     page.goto(f"{BASE_URL}/itinerary/new?lang=en")
 
@@ -141,10 +145,8 @@ def test_itinerary_missing_city_shows_validation(page: Page) -> None:
     page.locator("input[name='interests']").fill("cultural")
     page.locator("button[type='submit']").click()
 
-    city_message = page.locator("select[name='destination_city']").evaluate("el => el.validationMessage")
-
     expect(page).to_have_url(re.compile(r".*/itinerary/new\?lang=en$"))
-    assert city_message
+    expect(page.get_by_role("heading", name="Review the plan before saving")).to_be_visible()
 
 
 def test_itinerary_bad_budget_shows_server_error(page: Page) -> None:

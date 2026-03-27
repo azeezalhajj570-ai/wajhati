@@ -1,11 +1,20 @@
+import json
 from urllib.parse import parse_qs, urlparse
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from wajhati import db
-from wajhati.models import Attraction, Destination, Favorite, Itinerary, ItineraryItem, Review, User
-from wajhati.services.recommender import generate_itinerary, match_destinations
+from wajhati.models import AppSetting, Attraction, Destination, Favorite, Itinerary, ItineraryItem, Review, User
+from wajhati.services.recommender import (
+    AI_PROVIDER_GEMINI,
+    DEFAULT_AI_SYSTEM_PROMPT,
+    DEFAULT_GEMINI_MODEL,
+    ai_recommendations_available,
+    generate_itinerary,
+    get_ai_settings,
+    match_destinations,
+)
 from wajhati.translations import SAUDI_CITIES, tr_category, tr_city, tr_destination, tr_season
 
 main_bp = Blueprint("main", __name__)
@@ -132,6 +141,55 @@ def _build_itinerary_form_data(form=None):
     }
 
 
+def _serialize_generated_itinerary(generated):
+    return json.dumps(
+        {
+            "items": generated.get("items", []),
+            "estimated_total_cost": generated.get("estimated_total_cost", 0.0),
+        },
+        ensure_ascii=False,
+    )
+
+
+def _parse_generated_itinerary(raw_value):
+    try:
+        payload = json.loads(raw_value or "{}")
+    except (TypeError, ValueError, json.JSONDecodeError):
+        return {"items": [], "estimated_total_cost": 0.0}
+
+    items = []
+    for item in payload.get("items", []):
+        try:
+            day_number = int(item.get("day_number", 1))
+        except (TypeError, ValueError):
+            day_number = 1
+        try:
+            estimated_cost = float(item.get("estimated_cost", 0.0))
+        except (TypeError, ValueError):
+            estimated_cost = 0.0
+        title = str(item.get("title", "")).strip()
+        if not title:
+            continue
+        items.append(
+            {
+                "day_number": day_number,
+                "title": title,
+                "notes": str(item.get("notes", "")).strip(),
+                "estimated_cost": round(max(estimated_cost, 0.0), 2),
+            }
+        )
+
+    try:
+        estimated_total_cost = float(payload.get("estimated_total_cost", 0.0))
+    except (TypeError, ValueError):
+        estimated_total_cost = sum(item["estimated_cost"] for item in items)
+
+    return {
+        "items": items,
+        "estimated_total_cost": round(max(estimated_total_cost, 0.0), 2),
+    }
+
+
 def _build_destination_form_data(form=None):
     form = form or {}
     return {
@@ -158,6 +216,32 @@ def _build_attraction_form_data(form=None):
         "latitude": str(form.get("latitude", "")).strip(),
         "longitude": str(form.get("longitude", "")).strip(),
     }
+
+
+def _build_ai_settings_form_data(form=None):
+    settings = get_ai_settings()
+    form = form or {}
+    if form:
+        enabled_value = str(form.get("enabled", "")).strip().lower()
+        return {
+            "enabled": enabled_value in {"1", "true", "on", "yes"},
+            "provider": AI_PROVIDER_GEMINI,
+            "model": str(form.get("model", settings["model"])).strip() or DEFAULT_GEMINI_MODEL,
+            "api_key": str(form.get("api_key", settings["api_key"])).strip(),
+            "system_prompt": str(form.get("system_prompt", settings["system_prompt"])).strip() or DEFAULT_AI_SYSTEM_PROMPT,
+        }
+    return settings
+
+
+def _validate_ai_settings_form(form_data):
+    errors = []
+    if not form_data["model"]:
+        errors.append(("يرجى إدخال اسم نموذج Gemini.", "Please enter a Gemini model name."))
+    if form_data["enabled"] and not form_data["api_key"]:
+        errors.append(("أدخل مفتاح Gemini API قبل تفعيل الميزة.", "Enter a Gemini API key before enabling the feature."))
+    if not form_data["system_prompt"]:
+        errors.append(("يرجى إدخال تعليمات النظام.", "Please enter a system prompt."))
+    return errors
 
 
 def _validate_destination_form(form_data, available_cities):
@@ -290,9 +374,7 @@ def _validate_itinerary_form(form_data, available_cities):
     errors = []
 
     city = form_data["destination_city"]
-    if not city:
-        errors.append(("يرجى اختيار مدينة الوجهة.", "Please choose a destination city."))
-    elif city not in available_cities:
+    if city and city not in available_cities:
         errors.append(("يرجى اختيار مدينة وجهة من القائمة المتاحة.", "Please choose a destination city from the available list."))
 
     try:
@@ -509,6 +591,36 @@ def admin_users():
     return render_template("admin_users.html", users=users)
 
 
+@main_bp.route("/admin/ai-settings", methods=["GET", "POST"])
+@login_required
+def admin_ai_settings():
+    _require_admin()
+    lang = _get_ui_lang()
+    form_data = _build_ai_settings_form_data(request.form if request.method == "POST" else None)
+
+    if request.method == "POST":
+        errors = _validate_ai_settings_form(form_data)
+        for error in errors:
+            flash(_ui_text(error[0], error[1], lang), "danger")
+        if not errors:
+            AppSetting.set_value("ai_recommendations_enabled", "1" if form_data["enabled"] else "0")
+            AppSetting.set_value("ai_recommendations_provider", form_data["provider"])
+            AppSetting.set_value("ai_recommendations_model", form_data["model"])
+            AppSetting.set_value("ai_recommendations_api_key", form_data["api_key"])
+            AppSetting.set_value("ai_recommendations_system_prompt", form_data["system_prompt"])
+            db.session.commit()
+            flash(_ui_text("تم حفظ إعدادات الذكاء الاصطناعي.", "AI settings saved successfully.", lang), "success")
+            return redirect(url_for("main.admin_ai_settings", lang=lang))
+
+    saved_settings = get_ai_settings()
+    return render_template(
+        "admin_ai_settings.html",
+        form_data=form_data,
+        saved_settings=saved_settings,
+        ai_status_ready=ai_recommendations_available(saved_settings),
+    )
+
+
 @main_bp.route("/")
 def index():
     featured = Destination.query.order_by(Destination.created_at.desc()).limit(6).all()
@@ -650,8 +762,10 @@ def create_itinerary():
     ]
     suggested_interests = list(dict.fromkeys([*PROFILE_TAG_OPTIONS, *category_interests]))
     form_data = _build_itinerary_form_data(request.form if request.method == "POST" else None)
+    preview_itinerary = None
 
     if request.method == "POST":
+        action = str(request.form.get("action", "generate")).strip().lower()
         parsed = _validate_itinerary_form(form_data, cities)
         for error in parsed["errors"]:
             flash(_ui_text(error[0], error[1], lang), "danger")
@@ -662,47 +776,77 @@ def create_itinerary():
                 suggested_interests=suggested_interests,
                 form_data=form_data,
                 trip_types=TRIP_TYPES,
+                ai_settings=get_ai_settings(),
             )
 
-        destinations = Destination.query.all()
-        matched = match_destinations(
-            destinations,
-            city=parsed["city"],
-            budget=parsed["budget"],
-            interests=parsed["interests"],
-            profile_context=_user_profile_context(current_user),
-        )
-        if not matched:
-            flash(_ui_text("لم نتمكن من العثور على وجهات تطابق تفضيلاتك الحالية. جرّب مدينة أو ميزانية أو اهتمامات مختلفة.", "No destinations matched your current preferences. Try a different city, budget, or interests.", lang), "warning")
-            return render_template(
-                "create_itinerary.html",
-                cities=cities,
-                suggested_interests=suggested_interests,
-                form_data=form_data,
-                trip_types=TRIP_TYPES,
+        if action == "confirm":
+            generated = _parse_generated_itinerary(request.form.get("generated_itinerary"))
+            if not generated["items"]:
+                flash(_ui_text("انتهت صلاحية الاقتراح الحالي. أعد التوليد أولاً.", "The current suggestion is no longer valid. Please regenerate it first.", lang), "warning")
+                return render_template(
+                    "create_itinerary.html",
+                    cities=cities,
+                    suggested_interests=suggested_interests,
+                    form_data=form_data,
+                    trip_types=TRIP_TYPES,
+                    ai_settings=get_ai_settings(),
+                )
+        else:
+            destinations = Destination.query.all()
+            matched = match_destinations(
+                destinations,
+                city=parsed["city"],
+                budget=parsed["budget"],
+                interests=parsed["interests"],
+                profile_context=_user_profile_context(current_user),
             )
+            if not matched:
+                flash(_ui_text("لا توجد وجهات متاحة حاليًا لإنشاء اقتراح.", "There are no destinations available right now to build a suggestion.", lang), "warning")
+                return render_template(
+                    "create_itinerary.html",
+                    cities=cities,
+                    suggested_interests=suggested_interests,
+                    form_data=form_data,
+                    trip_types=TRIP_TYPES,
+                    ai_settings=get_ai_settings(),
+                )
 
-        generated = generate_itinerary(
-            matched,
-            duration_days=parsed["duration_days"],
-            budget=parsed["budget"],
-            trip_type=parsed["trip_type"],
-            interests=parsed["interests"],
-            profile_context=_user_profile_context(current_user),
-        )
-        if not generated["items"]:
-            flash(_ui_text("تعذر إنشاء خطة رحلة من التفضيلات المحددة.", "We could not generate an itinerary from the selected preferences.", lang), "warning")
-            return render_template(
-                "create_itinerary.html",
-                cities=cities,
-                suggested_interests=suggested_interests,
-                form_data=form_data,
-                trip_types=TRIP_TYPES,
+            generated = generate_itinerary(
+                matched,
+                duration_days=parsed["duration_days"],
+                budget=parsed["budget"],
+                trip_type=parsed["trip_type"],
+                interests=parsed["interests"],
+                profile_context=_user_profile_context(current_user),
             )
+            if not generated["items"]:
+                flash(_ui_text("تعذر إنشاء خطة رحلة من التفضيلات المحددة.", "We could not generate an itinerary from the selected preferences.", lang), "warning")
+                return render_template(
+                    "create_itinerary.html",
+                    cities=cities,
+                    suggested_interests=suggested_interests,
+                    form_data=form_data,
+                    trip_types=TRIP_TYPES,
+                    ai_settings=get_ai_settings(),
+                )
+
+            if action != "confirm":
+                preview_itinerary = generated
+                flash(_ui_text("تم إنشاء اقتراح جديد. راجعه ثم أكد الحفظ أو أعد التوليد.", "A new suggestion was generated. Review it, then confirm save or regenerate.", lang), "success")
+                return render_template(
+                    "create_itinerary.html",
+                    cities=cities,
+                    suggested_interests=suggested_interests,
+                    form_data=form_data,
+                    trip_types=TRIP_TYPES,
+                    ai_settings=get_ai_settings(),
+                    preview_itinerary=preview_itinerary,
+                    generated_itinerary_json=_serialize_generated_itinerary(preview_itinerary),
+                )
 
         itinerary = Itinerary(
             user_id=current_user.id,
-            destination_city=parsed["city"],
+            destination_city=parsed["city"] or _ui_text("مرن", "Flexible", lang),
             trip_type=parsed["trip_type"],
             duration_days=parsed["duration_days"],
             budget=parsed["budget"],
@@ -733,6 +877,9 @@ def create_itinerary():
         suggested_interests=suggested_interests,
         form_data=form_data,
         trip_types=TRIP_TYPES,
+        ai_settings=get_ai_settings(),
+        preview_itinerary=preview_itinerary,
+        generated_itinerary_json="",
     )
 
 

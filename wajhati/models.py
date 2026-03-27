@@ -15,6 +15,30 @@ class Favorite(db.Model):
     __table_args__ = (db.UniqueConstraint("user_id", "destination_id", name="uq_favorite"),)
 
 
+class AppSetting(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(120), unique=True, nullable=False)
+    value = db.Column(db.Text, nullable=False, default="")
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    @classmethod
+    def get_value(cls, key, default=""):
+        setting = cls.query.filter_by(key=key).first()
+        if setting is None:
+            return default
+        return setting.value
+
+    @classmethod
+    def set_value(cls, key, value):
+        setting = cls.query.filter_by(key=key).first()
+        if setting is None:
+            setting = cls(key=key, value=str(value))
+            db.session.add(setting)
+        else:
+            setting.value = str(value)
+        return setting
+
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)

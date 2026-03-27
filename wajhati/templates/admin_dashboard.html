@@ -36,6 +36,10 @@
       <h2 class="mb-2 text-xl font-bold">{{ t("إدارة المستخدمين", "Manage Users", ui_lang) }}</h2>
       <p class="text-sm text-slate-500">{{ t("مراجعة المستخدمين وصلاحيات الإدارة.", "Review users and admin privileges.", ui_lang) }}</p>
     </a>
+    <a href="{{ url_for('main.admin_ai_settings', lang=ui_lang) }}" class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
+      <h2 class="mb-2 text-xl font-bold">{{ t("إعدادات الذكاء الاصطناعي", "AI Settings", ui_lang) }}</h2>
+      <p class="text-sm text-slate-500">{{ t("ضبط Gemini لتوليد التوصيات وخطط الرحلات.", "Configure Gemini for recommendations and itinerary generation.", ui_lang) }}</p>
+    </a>
   </div>
 
   <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">

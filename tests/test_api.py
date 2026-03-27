@@ -78,3 +78,19 @@ class ItineraryApiTests(unittest.TestCase):
             response.get_json()["error"],
             "No destinations matched the selected preferences",
         )
+
+    def test_generate_itinerary_without_city_still_returns_recommendations(self):
+        response = self.client.post(
+            "/api/itineraries/generate",
+            json={
+                "destination_city": "",
+                "duration_days": 2,
+                "budget": 1000,
+                "trip_type": "family",
+                "interests": ["cultural"],
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.get_json()
+        self.assertTrue(payload["items"])
