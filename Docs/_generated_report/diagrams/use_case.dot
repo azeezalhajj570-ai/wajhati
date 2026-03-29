@@ -1,0 +1,36 @@
+digraph G {
+    graph [fontname="Times New Roman", bgcolor="white", rankdir=LR, pad=0.35, nodesep=0.6, ranksep=0.85];
+    node [fontname="Times New Roman", shape=ellipse, style="filled", color="#123B5D", fillcolor="#F7F3E8", fontcolor="#1F2933"];
+    edge [fontname="Times New Roman", color="#2E6F95", penwidth=1.4];
+
+    Visitor [shape=box, style="rounded,filled", fillcolor="#E9D8A6", color="#123B5D"];
+    User [shape=box, style="rounded,filled", fillcolor="#E9D8A6", color="#123B5D"];
+    Admin [shape=box, style="rounded,filled", fillcolor="#E9D8A6", color="#123B5D"];
+
+    Register [label="Register Account"];
+    Login [label="Login"];
+    Browse [label="Browse Destinations"];
+    Review [label="Submit Review"];
+    Favorite [label="Manage Favorites"];
+    Plan [label="Generate Itinerary"];
+    Save [label="Save Itinerary"];
+    Profile [label="Update Preference Profile"];
+    ManageDest [label="Manage Destinations"];
+    ManageAttr [label="Manage Attractions"];
+    ManageUsers [label="Manage Users"];
+    ManageAI [label="Configure AI Settings"];
+
+    Visitor -> Register;
+    Visitor -> Login;
+    Visitor -> Browse;
+    User -> Browse;
+    User -> Review;
+    User -> Favorite;
+    User -> Plan;
+    User -> Save;
+    User -> Profile;
+    Admin -> ManageDest;
+    Admin -> ManageAttr;
+    Admin -> ManageUsers;
+    Admin -> ManageAI;
+}

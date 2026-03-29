@@ -1,0 +1,34 @@
+digraph G {
+    graph [fontname="Times New Roman", bgcolor="white", rankdir=TB, pad=0.25, nodesep=0.3, ranksep=0.3];
+    node [fontname="Times New Roman", shape=plain];
+    edge [style=invis];
+
+    Sequence [label=<
+    <TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="7" COLOR="#123B5D">
+      <TR>
+        <TD BGCOLOR="#E9D8A6"><B>User</B></TD>
+        <TD BGCOLOR="#F7F3E8"><B>Web UI</B></TD>
+        <TD BGCOLOR="#F7F3E8"><B>Main Route</B></TD>
+        <TD BGCOLOR="#F7F3E8"><B>Database</B></TD>
+        <TD BGCOLOR="#F7F3E8"><B>Recommender</B></TD>
+        <TD BGCOLOR="#A9D6E5"><B>Gemini API</B></TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT">1. Enter trip preferences</TD>
+        <TD ALIGN="LEFT">2. Submit planning form</TD>
+        <TD ALIGN="LEFT">3. Validate request values</TD>
+        <TD ALIGN="LEFT">4. Load profile and destinations</TD>
+        <TD ALIGN="LEFT">5. Rank matching destinations</TD>
+        <TD ALIGN="LEFT">6a. Generate AI draft when enabled</TD>
+      </TR>
+      <TR>
+        <TD ALIGN="LEFT">10. Review preview itinerary</TD>
+        <TD ALIGN="LEFT">9. Show preview / confirm / regenerate</TD>
+        <TD ALIGN="LEFT">8. Return itinerary payload</TD>
+        <TD ALIGN="LEFT">7a. Return candidate data</TD>
+        <TD ALIGN="LEFT">6b. Build rule-based fallback if needed</TD>
+        <TD ALIGN="LEFT">7b. Return JSON itinerary</TD>
+      </TR>
+    </TABLE>
+    >];
+}

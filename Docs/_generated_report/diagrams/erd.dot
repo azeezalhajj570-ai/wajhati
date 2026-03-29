@@ -1,0 +1,22 @@
+digraph G {
+    graph [fontname="Times New Roman", bgcolor="white", rankdir=LR, pad=0.35, nodesep=0.65, ranksep=1.0];
+    node [fontname="Times New Roman", shape=record, style="filled", color="#123B5D", fillcolor="#F7F3E8", fontcolor="#1F2933"];
+    edge [fontname="Times New Roman", color="#2E6F95", penwidth=1.4, arrowsize=0.8];
+
+    User [label="{USER|PK id\lname\lemail\lpassword_hash\lis_admin\lpreferred_language\lage_range\lgender\lfavorite_tags\lcreated_at\l}"];
+    Destination [label="{DESTINATION|PK id\lname\lcity\lcategory\ldescription\lestimated_cost\llatitude\llongitude\lseason\lcreated_at\l}"];
+    Attraction [label="{ATTRACTION|PK id\lFK destination_id\lname\lcategory\ldescription\lentry_cost\lduration_hours\llatitude\llongitude\l}"];
+    Favorite [label="{FAVORITE|PK id\lFK user_id\lFK destination_id\lcreated_at\l}"];
+    Review [label="{REVIEW|PK id\lFK user_id\lFK destination_id\lrating\lcomment\lcreated_at\l}"];
+    Itinerary [label="{ITINERARY|PK id\lFK user_id\ldestination_city\ltrip_type\lduration_days\lbudget\linterests\lestimated_total_cost\lcreated_at\l}"];
+    ItineraryItem [label="{ITINERARY_ITEM|PK id\lFK itinerary_id\lday_number\ltitle\lnotes\lestimated_cost\l}"];
+    AppSetting [label="{APP_SETTING|PK id\lkey\lvalue\lupdated_at\l}"];
+
+    User -> Itinerary [label="1 to many"];
+    User -> Favorite [label="1 to many"];
+    User -> Review [label="1 to many"];
+    Destination -> Attraction [label="1 to many"];
+    Destination -> Favorite [label="1 to many"];
+    Destination -> Review [label="1 to many"];
+    Itinerary -> ItineraryItem [label="1 to many"];
+}
