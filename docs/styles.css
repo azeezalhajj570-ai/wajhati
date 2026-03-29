@@ -1,17 +1,18 @@
 :root {
   --color-primary: #0f5132;
   --color-primary-strong: #0b3e26;
-  --color-secondary: #e6d3b3;
   --color-accent: #3fa7d6;
-  --color-ink: #13211a;
-  --color-muted: #4f5d54;
-  --color-paper: #f8f5f0;
-  --color-surface: #fffdfa;
-  --color-border: rgba(19, 33, 26, 0.12);
-  --shadow-soft: 0 22px 60px rgba(15, 81, 50, 0.12);
-  --shadow-card: 0 12px 30px rgba(19, 33, 26, 0.08);
-  --radius-lg: 28px;
-  --radius-md: 20px;
+  --color-secondary: #e6d3b3;
+  --color-paper: #f7f3ec;
+  --color-surface: #fffdf9;
+  --color-ink: #172117;
+  --color-muted: #58645a;
+  --color-border: rgba(23, 33, 23, 0.1);
+  --shadow-soft: 0 20px 60px rgba(15, 81, 50, 0.08);
+  --shadow-card: 0 14px 32px rgba(23, 33, 23, 0.08);
+  --radius-xl: 32px;
+  --radius-lg: 24px;
+  --radius-md: 18px;
   --radius-sm: 14px;
 }
 
@@ -19,18 +20,13 @@
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 body {
   margin: 0;
   font-family: "Space Grotesk", Arial, sans-serif;
   color: var(--color-ink);
   background:
-    radial-gradient(circle at top left, rgba(63, 167, 214, 0.18), transparent 28%),
-    radial-gradient(circle at top right, rgba(230, 211, 179, 0.38), transparent 24%),
-    linear-gradient(180deg, #f6f1e8 0%, #f8f5f0 100%);
+    radial-gradient(circle at top left, rgba(63, 167, 214, 0.12), transparent 25%),
+    linear-gradient(180deg, #f2ebdf 0%, var(--color-paper) 100%);
 }
 
 a {
@@ -43,112 +39,145 @@ img {
   max-width: 100%;
 }
 
-.page-shell {
+.site-shell {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 24px 0 56px;
+  padding: 20px 0 56px;
+}
+
+.hero,
+.page-header,
+.section,
+.destination-card,
+.step-card,
+.info-panel,
+.glass-panel,
+.itinerary-day {
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
 }
 
 .hero {
   padding: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 36px;
   background:
-    linear-gradient(135deg, rgba(15, 81, 50, 0.94), rgba(10, 52, 84, 0.9)),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
-  box-shadow: var(--shadow-soft);
+    linear-gradient(135deg, rgba(15, 81, 50, 0.96), rgba(14, 71, 109, 0.9)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0));
   color: #ffffff;
 }
 
-.topbar {
+.hero-home {
+  min-height: 580px;
+}
+
+.nav {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   gap: 20px;
-  margin-bottom: 56px;
 }
 
 .brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  font-family: "Cairo", Arial, sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.brand-dark {
+  color: var(--color-ink);
 }
 
 .brand-mark {
   display: inline-grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, var(--color-secondary), #fff3da);
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fff0ca, var(--color-secondary));
   color: var(--color-primary-strong);
   font-weight: 800;
-  font-size: 1.4rem;
 }
 
-.brand h1,
-.brand p,
-.hero h2,
-.section h3,
-.feature-card h4,
-.visual-card figcaption,
-.stat strong {
-  font-family: "Cairo", Arial, sans-serif;
-}
-
-.brand h1,
-.brand p {
-  margin: 0;
-}
-
-.eyebrow,
-.kicker {
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.topbar-links {
+.nav-links {
   display: flex;
-  gap: 16px;
+  align-items: center;
+  gap: 14px;
   flex-wrap: wrap;
 }
 
-.topbar-links a {
+.nav-links a {
   padding: 10px 14px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  font-weight: 600;
+}
+
+.nav-links a.active {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.nav-light {
+  margin-bottom: 28px;
+}
+
+.nav-links-dark a.active {
+  background: rgba(15, 81, 50, 0.1);
+  color: var(--color-primary-strong);
+}
+
+.hero-grid,
+.split-section,
+.planner-layout {
+  display: grid;
+  gap: 24px;
 }
 
 .hero-grid {
-  display: grid;
-  grid-template-columns: 1.6fr 0.9fr;
-  gap: 28px;
-  align-items: stretch;
+  grid-template-columns: 1.5fr 0.9fr;
+  align-items: end;
+  margin-top: 48px;
 }
 
-.hero-copy {
-  padding: 8px 4px 16px;
-}
-
-.hero-copy h2 {
-  margin: 14px 0 18px;
-  font-size: clamp(2rem, 5vw, 4.3rem);
-  line-height: 1.05;
-}
-
-.hero-text {
-  max-width: 60ch;
+.hero-copy h1,
+.page-intro h1,
+.section-heading h2,
+.destination-copy h2,
+.destination-copy h3,
+.step-card h3,
+.info-panel h3,
+.itinerary-header h2,
+.itinerary-day h3 {
   margin: 0;
-  font-size: 1.05rem;
-  line-height: 1.8;
-  color: rgba(255, 255, 255, 0.86);
+  font-family: "Cairo", Arial, sans-serif;
 }
 
-.hero-actions {
+.hero-copy h1 {
+  max-width: 11ch;
+  font-size: clamp(2.3rem, 6vw, 4.8rem);
+  line-height: 1.02;
+  margin-top: 12px;
+}
+
+.eyebrow,
+.panel-label {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.lead {
+  max-width: 60ch;
+  margin: 18px 0 0;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.actions {
   display: flex;
   gap: 14px;
   flex-wrap: wrap;
@@ -160,209 +189,297 @@ img {
   align-items: center;
   justify-content: center;
   min-height: 48px;
-  padding: 12px 18px;
+  padding: 12px 20px;
+  border: 0;
   border-radius: 999px;
+  font: inherit;
   font-weight: 700;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-}
-
-.button:hover {
-  transform: translateY(-1px);
+  cursor: pointer;
 }
 
 .button-primary {
-  background: linear-gradient(135deg, #f4dfb9, #fff5de);
+  background: linear-gradient(135deg, #f5dfb4, #fff4dc);
   color: var(--color-primary-strong);
-  box-shadow: 0 10px 24px rgba(230, 211, 179, 0.2);
 }
 
 .button-secondary {
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.18);
   color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
-.hero-card,
-.feature-card,
-.visual-card,
-.note-card {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card);
+.glass-panel,
+.info-panel,
+.section,
+.page-header,
+.destination-card,
+.step-card,
+.itinerary-day {
+  border-radius: var(--radius-xl);
+  background: rgba(255, 253, 249, 0.9);
 }
 
-.hero-card {
-  display: grid;
-  gap: 14px;
+.glass-panel {
   padding: 22px;
   color: var(--color-ink);
 }
 
-.stat {
-  padding: 18px;
+.metric-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.metric {
+  padding: 16px;
   border-radius: var(--radius-md);
-  background: linear-gradient(180deg, #fffaf1, #f5efe4);
+  background: linear-gradient(180deg, #fff8eb, #f6efe1);
 }
 
-.stat span {
-  display: block;
-  margin-bottom: 8px;
+.metric span,
+.destination-copy p,
+.step-card p,
+.info-panel p,
+.page-intro p,
+.itinerary-header p,
+.itinerary-day p,
+.planner-form label span,
+.card-meta span {
   color: var(--color-muted);
-  font-size: 0.92rem;
 }
 
-.stat strong {
-  font-size: 1.2rem;
+.metric strong {
+  display: block;
+  margin-top: 8px;
+  font-family: "Cairo", Arial, sans-serif;
+  font-size: 1.15rem;
 }
 
-main {
-  margin-top: 28px;
-}
-
-.section {
-  margin-top: 24px;
+.section,
+.page-header {
   padding: 26px;
-  border-radius: 32px;
-  background: rgba(255, 253, 250, 0.82);
-  border: 1px solid rgba(19, 33, 26, 0.08);
-  backdrop-filter: blur(10px);
+  margin-top: 24px;
 }
 
 .section-heading {
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 
-.section-heading h3 {
-  margin: 8px 0 0;
-  font-size: clamp(1.6rem, 3vw, 2.3rem);
+.section-heading h2 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  margin-top: 6px;
 }
 
-.feature-grid,
-.visual-grid {
+.card-grid {
   display: grid;
   gap: 18px;
 }
 
-.feature-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-.feature-card {
-  padding: 22px;
-}
-
-.feature-card h4 {
-  margin: 0 0 10px;
-  font-size: 1.24rem;
-}
-
-.feature-card p,
-.report-copy p,
-.note-card p {
-  margin: 0;
-  color: var(--color-muted);
-  line-height: 1.8;
-}
-
-.visual-grid {
+.card-grid-three {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.visual-card {
+.destination-card {
   overflow: hidden;
 }
 
-.visual-card img {
+.destination-card img {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
   background: linear-gradient(135deg, rgba(15, 81, 50, 0.08), rgba(63, 167, 214, 0.08));
 }
 
-.visual-card figcaption {
-  padding: 16px 18px 18px;
-  font-size: 1.1rem;
+.destination-copy {
+  padding: 20px;
+}
+
+.destination-copy p {
+  line-height: 1.7;
+  margin: 10px 0 0;
+}
+
+.badge,
+.filter-pill,
+.day-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
   font-weight: 700;
 }
 
-.report-section {
-  display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: 20px;
-  align-items: stretch;
+.badge,
+.day-badge {
+  background: rgba(15, 81, 50, 0.1);
+  color: var(--color-primary-strong);
 }
 
-.report-copy {
+.split-section {
+  grid-template-columns: 1.4fr 0.8fr;
+  align-items: start;
+}
+
+.steps {
+  display: grid;
+  gap: 16px;
+}
+
+.step-card,
+.info-panel {
+  padding: 22px;
+}
+
+.step-index {
+  display: inline-block;
+  margin-bottom: 10px;
+  font-weight: 800;
+  color: var(--color-accent);
+}
+
+.text-link {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--color-primary-strong);
+  font-weight: 700;
+}
+
+.cta-band {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.page-intro h1 {
+  font-size: clamp(2rem, 5vw, 4rem);
+  margin-top: 6px;
+}
+
+.page-intro p {
+  max-width: 64ch;
+  line-height: 1.8;
+  margin: 14px 0 0;
+}
+
+.filters-bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-pill {
+  background: #f2ede3;
+  color: var(--color-primary-strong);
+}
+
+.filter-pill.active {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.destination-card-detailed .card-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  font-size: 0.92rem;
+}
+
+.planner-layout {
+  grid-template-columns: 0.9fr 1.1fr;
+  align-items: start;
+}
+
+.planner-form {
+  display: grid;
   gap: 18px;
 }
 
-.report-copy h3 {
-  margin: 8px 0 0;
-  font-size: clamp(1.7rem, 3vw, 2.5rem);
+.planner-form label {
+  display: grid;
+  gap: 8px;
 }
 
-.report-frame {
-  min-height: 640px;
-  overflow: hidden;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  background: #ffffff;
-  box-shadow: var(--shadow-card);
-}
-
-.report-frame iframe {
+.planner-form select,
+.planner-form input[type="range"] {
   width: 100%;
-  height: 100%;
-  min-height: 640px;
-  border: 0;
 }
 
-.note-card {
-  padding: 22px;
+.planner-form select {
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #ffffff;
+  font: inherit;
+}
+
+.itinerary-panel {
+  min-height: 100%;
+}
+
+.itinerary-days {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.itinerary-day {
+  padding: 18px;
+}
+
+.itinerary-day h3 {
+  margin-top: 10px;
+  font-size: 1.2rem;
+}
+
+.itinerary-day p {
+  margin: 10px 0 0;
+  line-height: 1.7;
 }
 
 @media (max-width: 960px) {
   .hero-grid,
-  .report-section,
-  .feature-grid,
-  .visual-grid {
+  .split-section,
+  .planner-layout,
+  .card-grid-three,
+  .cta-band {
     grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .topbar {
-    align-items: flex-start;
+  .nav {
     flex-direction: column;
-    margin-bottom: 32px;
+    align-items: flex-start;
   }
 }
 
 @media (max-width: 640px) {
-  .page-shell {
+  .site-shell {
     width: min(100% - 20px, 1180px);
-    padding-top: 10px;
   }
 
   .hero,
-  .section {
+  .section,
+  .page-header {
     padding: 18px;
     border-radius: 24px;
   }
 
-  .hero-copy h2 {
-    font-size: 2.2rem;
-  }
-
-  .hero-actions,
-  .topbar-links {
+  .actions,
+  .nav-links {
     flex-direction: column;
+    align-items: stretch;
   }
 
   .button,
-  .topbar-links a {
+  .nav-links a {
     width: 100%;
   }
 }
