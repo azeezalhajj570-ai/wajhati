@@ -15,8 +15,20 @@ def _get_ui_lang():
     lang = request.args.get("lang") or request.form.get("lang")
     if not lang and request.referrer:
         lang = parse_qs(urlparse(request.referrer).query).get("lang", [None])[0]
+    if not lang and current_user.is_authenticated:
+        lang = getattr(current_user, "preferred_language", None)
     lang = lang or "ar"
-    return lang if lang in ("ar", "en") else "ar"
+    lang = lang if lang in ("ar", "en") else "ar"
+
+    if (
+        current_user.is_authenticated
+        and request.args.get("lang") in ("ar", "en")
+        and current_user.preferred_language != lang
+    ):
+        current_user.preferred_language = lang
+        db.session.commit()
+
+    return lang
 
 
 def _is_safe_redirect_url(target):
@@ -49,7 +61,8 @@ def register():
 
         admin_email = os.environ.get("ADMIN_EMAIL", "").strip().lower()
         is_first_user = User.query.count() == 0
-        user = User(name=name, email=email, is_admin=is_first_user or (admin_email and email == admin_email))
+        is_admin = is_first_user or (bool(admin_email) and email == admin_email)
+        user = User(name=name, email=email, is_admin=is_admin)
         user.set_password(password)
         db.session.add(user)
         db.session.commit()

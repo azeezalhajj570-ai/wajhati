@@ -90,11 +90,26 @@ CITY_TRANSLATIONS = {
 
 DESTINATION_TRANSLATIONS = {
     "Historic Diriyah": {"ar": "الدرعية التاريخية", "en": "Historic Diriyah"},
-    "Kingdom Centre Sky Bridge": {"ar": "جسر سماء برج المملكة", "en": "Kingdom Centre Sky Bridge"},
+    "Kingdom Centre Sky Bridge": {"ar": "جسر السماء في برج المملكة", "en": "Kingdom Centre Sky Bridge"},
     "AlUla Old Town": {"ar": "بلدة العلا القديمة", "en": "AlUla Old Town"},
     "Edge of the World": {"ar": "حافة العالم", "en": "Edge of the World"},
     "Jeddah Corniche": {"ar": "كورنيش جدة", "en": "Jeddah Corniche"},
     "Farasan Islands": {"ar": "جزر فرسان", "en": "Farasan Islands"},
+}
+
+GENERATED_DESTINATION_SUFFIX_TRANSLATIONS = {
+    "Heritage Quarter": {"ar": "الحي التراثي", "en": "Heritage Quarter"},
+    "Traditional Market Walk": {"ar": "ممشى السوق التراثي", "en": "Traditional Market Walk"},
+    "Cultural Village": {"ar": "القرية الثقافية", "en": "Cultural Village"},
+    "Corniche Promenade": {"ar": "ممشى الكورنيش", "en": "Corniche Promenade"},
+    "City View Lounge": {"ar": "واجهة إطلالة المدينة", "en": "City View Lounge"},
+    "Family Leisure Park": {"ar": "حديقة الترفيه العائلية", "en": "Family Leisure Park"},
+    "Desert Trail Camp": {"ar": "مخيم المسار الصحراوي", "en": "Desert Trail Camp"},
+    "Rock Ridge Escape": {"ar": "مغامرة التلال الصخرية", "en": "Rock Ridge Escape"},
+    "Adventure Valley Route": {"ar": "مسار وادي المغامرات", "en": "Adventure Valley Route"},
+    "Green Oasis Reserve": {"ar": "محمية الواحة الخضراء", "en": "Green Oasis Reserve"},
+    "Mountain View Garden": {"ar": "حديقة إطلالة الجبل", "en": "Mountain View Garden"},
+    "Wildlife Nature Park": {"ar": "منتزه الحياة الفطرية", "en": "Wildlife Nature Park"},
 }
 
 DESCRIPTION_TRANSLATIONS = {
@@ -121,6 +136,54 @@ DESCRIPTION_TRANSLATIONS = {
     "Island destination with beaches, marine life, and boat tours.": {
         "ar": "وجهة جزرية بشواطئ وحياة بحرية ورحلات بالقوارب.",
         "en": "Island destination with beaches, marine life, and boat tours.",
+    },
+    "Historic district with local architecture, museums, and cultural storytelling experiences.": {
+        "ar": "حي تاريخي يضم عمارة محلية ومتاحف وتجارب سرد ثقافي.",
+        "en": "Historic district with local architecture, museums, and cultural storytelling experiences.",
+    },
+    "Lively market area with regional crafts, food stalls, and heritage shops.": {
+        "ar": "منطقة سوق نابضة بالحياة تضم حرفا محلية وأكشاك طعام ومتاجر تراثية.",
+        "en": "Lively market area with regional crafts, food stalls, and heritage shops.",
+    },
+    "Interactive heritage site featuring art, performances, and family-friendly exhibitions.": {
+        "ar": "موقع تراثي تفاعلي يضم فنا وعروضا ومعارض مناسبة للعائلات.",
+        "en": "Interactive heritage site featuring art, performances, and family-friendly exhibitions.",
+    },
+    "Relaxed public promenade with cafes, photo spots, and evening walking areas.": {
+        "ar": "ممشى عام هادئ يضم مقاهي ونقاط تصوير ومساحات للتنزه المسائي.",
+        "en": "Relaxed public promenade with cafes, photo spots, and evening walking areas.",
+    },
+    "Modern leisure destination with panoramic views, dining, and shopping nearby.": {
+        "ar": "وجهة عصرية للاستجمام بإطلالات بانورامية وخيارات طعام وتسوق قريبة.",
+        "en": "Modern leisure destination with panoramic views, dining, and shopping nearby.",
+    },
+    "Open-air recreation area with gardens, seating zones, and activities for families.": {
+        "ar": "منطقة ترفيه مفتوحة تضم حدائق ومناطق جلوس وأنشطة للعائلات.",
+        "en": "Open-air recreation area with gardens, seating zones, and activities for families.",
+    },
+    "Outdoor adventure zone offering guided trails, scenic overlooks, and camp experiences.": {
+        "ar": "منطقة مغامرات خارجية توفر مسارات إرشادية وإطلالات خلابة وتجارب تخييم.",
+        "en": "Outdoor adventure zone offering guided trails, scenic overlooks, and camp experiences.",
+    },
+    "Rugged terrain destination popular for hiking, climbing, and exploration trips.": {
+        "ar": "وجهة بتضاريس وعرة مناسبة للمشي والتسلق ورحلات الاستكشاف.",
+        "en": "Rugged terrain destination popular for hiking, climbing, and exploration trips.",
+    },
+    "Exciting nature corridor with off-road access, viewpoints, and active group excursions.": {
+        "ar": "ممر طبيعي مليء بالحماس مع وصول للمسارات الوعرة ونقاط مشاهدة ورحلات جماعية نشطة.",
+        "en": "Exciting nature corridor with off-road access, viewpoints, and active group excursions.",
+    },
+    "Peaceful natural setting with shaded paths, native plants, and quiet picnic areas.": {
+        "ar": "بيئة طبيعية هادئة تضم ممرات مظللة ونباتات محلية ومناطق نزهة مريحة.",
+        "en": "Peaceful natural setting with shaded paths, native plants, and quiet picnic areas.",
+    },
+    "Scenic landscape area known for fresh air, open views, and relaxing nature walks.": {
+        "ar": "منطقة طبيعية خلابة تشتهر بالهواء النقي والإطلالات المفتوحة والمشي الهادئ.",
+        "en": "Scenic landscape area known for fresh air, open views, and relaxing nature walks.",
+    },
+    "Protected outdoor area where visitors can enjoy local ecosystems and birdwatching.": {
+        "ar": "منطقة خارجية محمية تتيح للزوار الاستمتاع بالأنظمة البيئية المحلية ومراقبة الطيور.",
+        "en": "Protected outdoor area where visitors can enjoy local ecosystems and birdwatching.",
     },
 }
 
@@ -178,7 +241,20 @@ def tr_city(value, ui_lang="ar"):
 
 
 def tr_destination(value, ui_lang="ar"):
-    return _translate(DESTINATION_TRANSLATIONS, value, ui_lang)
+    translated = _translate(DESTINATION_TRANSLATIONS, value, ui_lang)
+    if translated != value:
+        return translated
+
+    raw_value = str(value or "").strip()
+    for city in SAUDI_CITIES:
+        prefix = f"{city} "
+        if raw_value.startswith(prefix):
+            suffix = raw_value[len(prefix):]
+            translated_suffix = GENERATED_DESTINATION_SUFFIX_TRANSLATIONS.get(suffix)
+            if not translated_suffix:
+                return raw_value
+            return f"{tr_city(city, ui_lang)} {translated_suffix[ui_lang]}"
+    return translated
 
 
 def tr_category(value, ui_lang="ar"):

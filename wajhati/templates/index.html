@@ -29,7 +29,7 @@
           {% for destination in destinations[:4] %}
             <a href="{{ url_for('main.destination_detail', destination_id=destination.id, lang=ui_lang) }}" class="group block cursor-pointer">
               <div class="relative mb-3 h-64 overflow-hidden rounded-2xl">
-                <img class="h-full w-full object-cover transition duration-500 group-hover:scale-105" src="{{ destination_image(destination) }}" alt="{{ destination.name }}">
+                <img class="h-full w-full object-cover transition duration-500 group-hover:scale-105" src="{{ destination_image(destination) }}" alt="{{ tr_destination(destination.name, ui_lang) }}">
                 <div class="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-primary">{{ tr_category(destination.category, ui_lang) }}</div>
               </div>
               <h3 class="text-lg font-bold group-hover:text-primary">{{ tr_destination(destination.name, ui_lang) }}</h3>

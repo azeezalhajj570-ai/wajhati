@@ -7,6 +7,166 @@
   integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
   crossorigin=""
 >
+<style>
+  #destination-map {
+    background:
+      radial-gradient(circle at top, rgba(236, 91, 19, 0.12), transparent 28%),
+      linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+  }
+
+  .leaflet-popup-content-wrapper {
+    border-radius: 20px;
+    box-shadow: 0 18px 50px rgba(15, 23, 42, 0.18);
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .leaflet-popup-content {
+    margin: 0;
+    width: 280px !important;
+  }
+
+  .leaflet-popup-tip {
+    background: white;
+  }
+
+  .destination-pin {
+    position: relative;
+    width: 30px;
+    height: 30px;
+  }
+
+  .destination-pin__pulse {
+    position: absolute;
+    inset: 2px;
+    border-radius: 9999px;
+    background: rgba(236, 91, 19, 0.22);
+    animation: destination-pin-pulse 1.9s ease-out infinite;
+  }
+
+  .destination-pin__core {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #ff8547 0%, #ec5b13 100%);
+    border: 3px solid #fff;
+    box-shadow: 0 12px 28px rgba(236, 91, 19, 0.34);
+    color: white;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  .destination-pin__core::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    width: 10px;
+    height: 10px;
+    background: #ec5b13;
+    border-right: 3px solid #fff;
+    border-bottom: 3px solid #fff;
+    transform: rotate(45deg);
+    border-bottom-right-radius: 2px;
+  }
+
+  .destination-pin.is-active .destination-pin__core {
+    box-shadow: 0 16px 36px rgba(236, 91, 19, 0.42);
+    transform: translateY(-1px) scale(1.05);
+  }
+
+  .user-pin {
+    position: relative;
+    width: 34px;
+    height: 34px;
+  }
+
+  .user-pin__ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: rgba(14, 165, 233, 0.16);
+    border: 1px solid rgba(14, 165, 233, 0.28);
+    animation: destination-pin-pulse 2.1s ease-out infinite;
+  }
+
+  .user-pin__core {
+    position: absolute;
+    inset: 5px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #22d3ee 0%, #0f766e 100%);
+    border: 3px solid #fff;
+    box-shadow: 0 10px 24px rgba(15, 118, 110, 0.35);
+  }
+
+  .map-popup {
+    background: white;
+  }
+
+  .map-popup__hero {
+    height: 78px;
+    background:
+      radial-gradient(circle at top right, rgba(255,255,255,0.24), transparent 35%),
+      linear-gradient(135deg, #ec5b13 0%, #f59e0b 100%);
+  }
+
+  .map-popup__body {
+    padding: 14px 16px 16px;
+  }
+
+  .map-popup__title {
+    margin: 0 0 6px;
+    color: #0f172a;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.3;
+  }
+
+  .map-popup__meta {
+    margin: 0 0 10px;
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .map-popup__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .map-popup__chip {
+    border-radius: 9999px;
+    background: #fff4ed;
+    color: #c2410c;
+    padding: 5px 9px;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  .map-popup__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #ec5b13;
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .map-popup__cta:hover {
+    color: #c2410c;
+  }
+
+  @keyframes destination-pin-pulse {
+    0% { transform: scale(0.85); opacity: 0.95; }
+    70% { transform: scale(1.45); opacity: 0; }
+    100% { transform: scale(1.45); opacity: 0; }
+  }
+</style>
 
 <section class="mx-auto grid min-h-[calc(100vh-80px)] w-full max-w-7xl grid-cols-1 gap-6 px-6 py-8 xl:grid-cols-[360px_minmax(0,1fr)]">
   <aside class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -98,16 +258,60 @@
     const defaultCenter = [23.8859, 45.0792];
     const map = L.map(mapElement, { scrollWheelZoom: true }).setView(defaultCenter, 6);
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 18,
+    const streetLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
       attribution: "&copy; OpenStreetMap contributors",
-    }).addTo(map);
+    });
 
-    const icon = L.divIcon({
+    const lightLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+      maxZoom: 20,
+      attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+    });
+
+    const satelliteLayer = L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      {
+        maxZoom: 19,
+        attribution: "Tiles &copy; Esri",
+      }
+    );
+
+    streetLayer.addTo(map);
+
+    L.control.layers(
+      {
+        "{{ t('شوارع', 'Streets', ui_lang) }}": streetLayer,
+        "{{ t('فاتح', 'Light', ui_lang) }}": lightLayer,
+        "{{ t('أقمار صناعية', 'Satellite', ui_lang) }}": satelliteLayer,
+      },
+      {},
+      { position: "{{ 'topleft' if ui_lang == 'ar' else 'topright' }}" }
+    ).addTo(map);
+
+    [streetLayer, lightLayer, satelliteLayer].forEach((layer) => {
+      layer.on("tileerror", () => {
+        setLocationStatus("{{ t('تعذر تحميل طبقة الخريطة الحالية. جرّب طبقة أخرى من أزرار الخريطة.', 'The current map layer could not be loaded. Try another layer from the map control.', ui_lang) }}");
+      });
+      layer.on("load", () => {
+        if (locationStatus && locationStatus.textContent.includes("{{ t('تعذر تحميل طبقة الخريطة الحالية.', 'The current map layer could not be loaded.', ui_lang)[:10] }}")) {
+          locationStatus.textContent = "";
+        }
+      });
+    });
+
+    window.setTimeout(() => map.invalidateSize(), 120);
+
+    const destinationIcon = L.divIcon({
       className: "custom-map-marker",
-      html: '<div style="background:#ec5b13;color:white;width:18px;height:18px;border-radius:9999px;border:3px solid white;box-shadow:0 6px 16px rgba(0,0,0,.18);"></div>',
-      iconSize: [18, 18],
-      iconAnchor: [9, 9],
+      html: `
+        <div class="destination-pin">
+          <div class="destination-pin__pulse"></div>
+          <div class="destination-pin__core">+</div>
+        </div>
+      `,
+      iconSize: [30, 38],
+      iconAnchor: [15, 34],
+      popupAnchor: [0, -28],
     });
 
     const markers = new Map();
@@ -118,15 +322,34 @@
     destinations.forEach((destination) => {
       if (destination.latitude == null || destination.longitude == null) return;
 
-      const marker = L.marker([destination.latitude, destination.longitude], { icon }).addTo(map);
+      const marker = L.marker([destination.latitude, destination.longitude], { icon: destinationIcon }).addTo(map);
       marker.bindPopup(`
-        <div style="min-width:220px">
-          <strong>${destination.name}</strong><br>
-          <span>${destination.city} - ${destination.category}</span><br>
-          <span>${destination.estimated_cost} SAR</span><br>
-          <a href="${destination.detail_url}" style="color:#ec5b13;font-weight:700">{{ t("عرض التفاصيل", "View details", ui_lang) }}</a>
+        <div class="map-popup">
+          <div class="map-popup__hero"></div>
+          <div class="map-popup__body">
+            <h3 class="map-popup__title">${destination.name}</h3>
+            <p class="map-popup__meta">${destination.city}${destination.season ? ` • ${destination.season}` : ""}</p>
+            <div class="map-popup__chips">
+              <span class="map-popup__chip">${destination.category}</span>
+              <span class="map-popup__chip">${destination.estimated_cost} SAR</span>
+            </div>
+            <a href="${destination.detail_url}" class="map-popup__cta">{{ t("عرض التفاصيل", "View details", ui_lang) }} <span aria-hidden="true">→</span></a>
+          </div>
         </div>
       `);
+      marker.on("popupopen", () => {
+        document.querySelectorAll(".destination-pin").forEach((pin) => pin.classList.remove("is-active"));
+        const markerElement = marker.getElement();
+        if (!markerElement) return;
+        const pin = markerElement.querySelector(".destination-pin");
+        if (pin) pin.classList.add("is-active");
+      });
+      marker.on("popupclose", () => {
+        const markerElement = marker.getElement();
+        if (!markerElement) return;
+        const pin = markerElement.querySelector(".destination-pin");
+        if (pin) pin.classList.remove("is-active");
+      });
       markers.set(String(destination.id), marker);
       bounds.push([destination.latitude, destination.longitude]);
     });
@@ -150,9 +373,15 @@
 
     const currentLocationIcon = L.divIcon({
       className: "current-location-marker",
-      html: '<div style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:9999px;background:#0f766e;border:3px solid white;box-shadow:0 8px 18px rgba(15,118,110,.35);"><div style="width:8px;height:8px;border-radius:9999px;background:white;"></div></div>',
-      iconSize: [22, 22],
-      iconAnchor: [11, 11],
+      html: `
+        <div class="user-pin">
+          <div class="user-pin__ring"></div>
+          <div class="user-pin__core"></div>
+        </div>
+      `,
+      iconSize: [34, 34],
+      iconAnchor: [17, 17],
+      popupAnchor: [0, -18],
     });
 
     const showCurrentLocation = (position) => {
@@ -166,9 +395,15 @@
       }
 
       currentLocationMarker.bindPopup(`
-        <div style="min-width:180px">
-          <strong>{{ t("موقعي الحالي", "My Current Location", ui_lang) }}</strong><br>
-          <span>{{ t("دقة تقريبية", "Approximate accuracy", ui_lang) }}: ${Math.round(accuracy)}m</span>
+        <div class="map-popup">
+          <div class="map-popup__hero" style="background:linear-gradient(135deg,#0ea5e9 0%,#0f766e 100%);"></div>
+          <div class="map-popup__body">
+            <h3 class="map-popup__title">{{ t("موقعي الحالي", "My Current Location", ui_lang) }}</h3>
+            <p class="map-popup__meta">{{ t("تم العثور على موقعك الحالي على الخريطة.", "Your current position was found on the map.", ui_lang) }}</p>
+            <div class="map-popup__chips">
+              <span class="map-popup__chip" style="background:#ecfeff;color:#0f766e;">{{ t("دقة تقريبية", "Approximate accuracy", ui_lang) }}: ${Math.round(accuracy)}m</span>
+            </div>
+          </div>
         </div>
       `);
 

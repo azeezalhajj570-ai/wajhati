@@ -2,7 +2,8 @@
 {% if request.referrer and '?lang=' in request.referrer %}
   {% set referrer_lang = request.referrer.split('?lang=')[-1].split('&')[0] %}
 {% endif %}
-{% set requested_lang = request.args.get('lang') or referrer_lang or 'ar' %}
+{% set saved_lang = current_user.preferred_language if current_user.is_authenticated else none %}
+{% set requested_lang = request.args.get('lang') or referrer_lang or saved_lang or 'ar' %}
 {% set ui_lang = requested_lang if requested_lang in ['ar', 'en'] else 'ar' %}
 {% set page_dir = 'rtl' if ui_lang == 'ar' else 'ltr' %}
 <!doctype html>

@@ -42,6 +42,7 @@ def create_app(config_class=Config):
 
         db.create_all()
         _ensure_user_profile_columns()
+        _ensure_destination_columns()
         seed_default_users()
         _ensure_admin_user()
         seed_demo_destinations()
@@ -61,6 +62,19 @@ def _ensure_user_profile_columns():
         statements.append("ALTER TABLE user ADD COLUMN favorite_tags VARCHAR(255) NOT NULL DEFAULT ''")
     if "is_admin" not in columns:
         statements.append("ALTER TABLE user ADD COLUMN is_admin BOOLEAN NOT NULL DEFAULT 0")
+
+    for statement in statements:
+        db.session.execute(text(statement))
+    if statements:
+        db.session.commit()
+
+
+def _ensure_destination_columns():
+    inspector = inspect(db.engine)
+    columns = {column["name"] for column in inspector.get_columns("destination")}
+    statements = []
+    if "image_url" not in columns:
+        statements.append("ALTER TABLE destination ADD COLUMN image_url VARCHAR(500)")
 
     for statement in statements:
         db.session.execute(text(statement))

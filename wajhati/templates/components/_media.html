@@ -1,6 +1,10 @@
 {% macro destination_image(destination) -%}
+  {% if destination.image_url %}
+    {{ destination.image_url }}
+  {% else %}
   {% set hay = ((destination.city or '') ~ ' ' ~ (destination.name or ''))|lower %}
   {{ city_image(hay) }}
+  {% endif %}
 {%- endmacro %}
 
 {% macro city_image(city_or_text) -%}

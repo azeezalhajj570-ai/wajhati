@@ -76,6 +76,7 @@ class Destination(db.Model):
     city = db.Column(db.String(120), nullable=False)
     category = db.Column(db.String(80), nullable=False)
     description = db.Column(db.Text, nullable=False)
+    image_url = db.Column(db.String(500), nullable=True)
     estimated_cost = db.Column(db.Float, nullable=False, default=0.0)
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
@@ -83,6 +84,7 @@ class Destination(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     attractions = db.relationship("Attraction", backref="destination", lazy=True, cascade="all, delete-orphan")
+    favorites = db.relationship("Favorite", backref="destination", lazy=True, cascade="all, delete-orphan")
     reviews = db.relationship("Review", backref="destination", lazy=True, cascade="all, delete-orphan")
 
 

@@ -1,69 +1,90 @@
 from wajhati import db
 from wajhati.models import Destination, User
+from wajhati.translations import SAUDI_CITIES
 
 
-SAMPLE_DESTINATIONS = [
-    {
-        "name": "Historic Diriyah",
-        "city": "Riyadh",
-        "category": "cultural",
-        "description": "UNESCO heritage district with museums and traditional Najdi architecture.",
-        "estimated_cost": 120,
-        "latitude": 24.7376,
-        "longitude": 46.5718,
-        "season": "winter",
-    },
-    {
-        "name": "Kingdom Centre Sky Bridge",
-        "city": "Riyadh",
-        "category": "leisure",
-        "description": "Modern landmark with panoramic city views and shopping options.",
-        "estimated_cost": 80,
-        "latitude": 24.7116,
-        "longitude": 46.6742,
-        "season": "all",
-    },
-    {
-        "name": "AlUla Old Town",
-        "city": "AlUla",
-        "category": "cultural",
-        "description": "Ancient settlement and heritage attractions surrounded by stunning landscapes.",
-        "estimated_cost": 250,
-        "latitude": 26.6084,
-        "longitude": 37.9232,
-        "season": "winter",
-    },
-    {
-        "name": "Edge of the World",
-        "city": "Riyadh",
-        "category": "adventure",
-        "description": "A dramatic cliff formation for hiking and desert exploration.",
-        "estimated_cost": 150,
-        "latitude": 24.9472,
-        "longitude": 45.6073,
-        "season": "winter",
-    },
-    {
-        "name": "Jeddah Corniche",
-        "city": "Jeddah",
-        "category": "leisure",
-        "description": "Waterfront attractions, cafes, and family-friendly walking areas.",
-        "estimated_cost": 60,
-        "latitude": 21.6073,
-        "longitude": 39.1043,
-        "season": "all",
-    },
-    {
-        "name": "Farasan Islands",
-        "city": "Jazan",
-        "category": "nature",
-        "description": "Island destination with beaches, marine life, and boat tours.",
-        "estimated_cost": 300,
-        "latitude": 16.7149,
-        "longitude": 42.1188,
-        "season": "spring",
-    },
-]
+DESTINATION_VARIANTS = {
+    "cultural": [
+        {
+            "name_suffix": "Heritage Quarter",
+            "description": "Historic district with local architecture, museums, and cultural storytelling experiences.",
+            "estimated_cost": 90,
+            "season": "winter",
+        },
+        {
+            "name_suffix": "Traditional Market Walk",
+            "description": "Lively market area with regional crafts, food stalls, and heritage shops.",
+            "estimated_cost": 70,
+            "season": "all",
+        },
+        {
+            "name_suffix": "Cultural Village",
+            "description": "Interactive heritage site featuring art, performances, and family-friendly exhibitions.",
+            "estimated_cost": 110,
+            "season": "spring",
+        },
+    ],
+    "leisure": [
+        {
+            "name_suffix": "Corniche Promenade",
+            "description": "Relaxed public promenade with cafes, photo spots, and evening walking areas.",
+            "estimated_cost": 60,
+            "season": "all",
+        },
+        {
+            "name_suffix": "City View Lounge",
+            "description": "Modern leisure destination with panoramic views, dining, and shopping nearby.",
+            "estimated_cost": 95,
+            "season": "all",
+        },
+        {
+            "name_suffix": "Family Leisure Park",
+            "description": "Open-air recreation area with gardens, seating zones, and activities for families.",
+            "estimated_cost": 80,
+            "season": "autumn",
+        },
+    ],
+    "adventure": [
+        {
+            "name_suffix": "Desert Trail Camp",
+            "description": "Outdoor adventure zone offering guided trails, scenic overlooks, and camp experiences.",
+            "estimated_cost": 140,
+            "season": "winter",
+        },
+        {
+            "name_suffix": "Rock Ridge Escape",
+            "description": "Rugged terrain destination popular for hiking, climbing, and exploration trips.",
+            "estimated_cost": 180,
+            "season": "spring",
+        },
+        {
+            "name_suffix": "Adventure Valley Route",
+            "description": "Exciting nature corridor with off-road access, viewpoints, and active group excursions.",
+            "estimated_cost": 160,
+            "season": "autumn",
+        },
+    ],
+    "nature": [
+        {
+            "name_suffix": "Green Oasis Reserve",
+            "description": "Peaceful natural setting with shaded paths, native plants, and quiet picnic areas.",
+            "estimated_cost": 75,
+            "season": "spring",
+        },
+        {
+            "name_suffix": "Mountain View Garden",
+            "description": "Scenic landscape area known for fresh air, open views, and relaxing nature walks.",
+            "estimated_cost": 85,
+            "season": "summer",
+        },
+        {
+            "name_suffix": "Wildlife Nature Park",
+            "description": "Protected outdoor area where visitors can enjoy local ecosystems and birdwatching.",
+            "estimated_cost": 100,
+            "season": "winter",
+        },
+    ],
+}
 
 DEFAULT_USERS = [
     {
@@ -81,7 +102,28 @@ DEFAULT_USERS = [
 ]
 
 
+def _generate_demo_destinations():
+    generated = []
+    for city in SAUDI_CITIES:
+        for category, variants in DESTINATION_VARIANTS.items():
+            for variant in variants:
+                generated.append(
+                    {
+                        "name": f"{city} {variant['name_suffix']}",
+                        "city": city,
+                        "category": category,
+                        "description": variant["description"],
+                        "estimated_cost": variant["estimated_cost"],
+                        "latitude": None,
+                        "longitude": None,
+                        "season": variant["season"],
+                    }
+                )
+    return generated
+
+
 def seed_demo_destinations():
+    sample_destinations = _generate_demo_destinations()
     existing_names = {
         name
         for (name,) in db.session.query(Destination.name)
@@ -91,7 +133,7 @@ def seed_demo_destinations():
 
     pending = [
         Destination(**item)
-        for item in SAMPLE_DESTINATIONS
+        for item in sample_destinations
         if item["name"] not in existing_names
     ]
     if not pending:

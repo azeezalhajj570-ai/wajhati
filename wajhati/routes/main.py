@@ -1,8 +1,11 @@
 import json
+import os
+import uuid
 from urllib.parse import parse_qs, urlparse
 
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
+from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
+from werkzeug.utils import secure_filename
 
 from wajhati import db
 from wajhati.models import AppSetting, Attraction, Destination, Favorite, Itinerary, ItineraryItem, Review, User
@@ -45,14 +48,47 @@ PROFILE_TAG_OPTIONS = (
     "leisure",
 )
 DESTINATION_SEASONS = ("all", "winter", "spring", "summer", "autumn")
+DESTINATION_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"}
 
 
 def _get_ui_lang():
     lang = request.args.get("lang") or request.form.get("lang")
     if not lang and request.referrer:
         lang = parse_qs(urlparse(request.referrer).query).get("lang", [None])[0]
+    if not lang and current_user.is_authenticated:
+        lang = getattr(current_user, "preferred_language", None)
     lang = lang or "ar"
-    return lang if lang in ("ar", "en") else "ar"
+    lang = lang if lang in ("ar", "en") else "ar"
+
+    if (
+        current_user.is_authenticated
+        and request.args.get("lang") in ("ar", "en")
+        and current_user.preferred_language != lang
+    ):
+        current_user.preferred_language = lang
+        db.session.commit()
+
+    return lang
+
+
+def _save_destination_image(upload):
+    filename = secure_filename(upload.filename or "")
+    if not filename:
+        return None, ("يرجى اختيار ملف صورة صالح.", "Please choose a valid image file.")
+
+    extension = os.path.splitext(filename)[1].lower()
+    if extension not in DESTINATION_IMAGE_EXTENSIONS:
+        return None, (
+            "امتداد الصورة غير مدعوم. استخدم JPG أو PNG أو WEBP أو GIF أو SVG.",
+            "Unsupported image format. Use JPG, PNG, WEBP, GIF, or SVG.",
+        )
+
+    upload_dir = os.path.join(current_app.root_path, "static", "uploads", "destinations")
+    os.makedirs(upload_dir, exist_ok=True)
+
+    saved_name = f"{uuid.uuid4().hex}{extension}"
+    upload.save(os.path.join(upload_dir, saved_name))
+    return f"/static/uploads/destinations/{saved_name}", None
 
 
 def _parse_interests(raw_value):
@@ -197,6 +233,7 @@ def _build_destination_form_data(form=None):
         "city": str(form.get("city", "")).strip(),
         "category": str(form.get("category", "")).strip().lower(),
         "description": str(form.get("description", "")).strip(),
+        "image_url": str(form.get("image_url", "")).strip(),
         "estimated_cost": str(form.get("estimated_cost", "")).strip(),
         "latitude": str(form.get("latitude", "")).strip(),
         "longitude": str(form.get("longitude", "")).strip(),
@@ -294,6 +331,7 @@ def _validate_destination_form(form_data, available_cities):
         "city": city,
         "category": category,
         "description": form_data["description"],
+        "image_url": form_data["image_url"],
         "estimated_cost": estimated_cost,
         "latitude": latitude,
         "longitude": longitude,
@@ -450,27 +488,97 @@ def admin_destinations():
     _require_admin()
     lang = _get_ui_lang()
     cities = _available_cities()
-    form_data = _build_destination_form_data(request.form if request.method == "POST" else None)
+    edit_destination = None
+    if request.method == "GET":
+        try:
+            edit_id = int(request.args.get("edit", "0"))
+        except ValueError:
+            edit_id = 0
+        if edit_id:
+            edit_destination = Destination.query.get_or_404(edit_id)
+            form_data = {
+                "name": edit_destination.name,
+                "city": edit_destination.city,
+                "category": edit_destination.category,
+                "description": edit_destination.description,
+                "image_url": edit_destination.image_url or "",
+                "estimated_cost": str(edit_destination.estimated_cost),
+                "latitude": "" if edit_destination.latitude is None else str(edit_destination.latitude),
+                "longitude": "" if edit_destination.longitude is None else str(edit_destination.longitude),
+                "season": edit_destination.season or "all",
+            }
+        else:
+            form_data = _build_destination_form_data()
+    else:
+        form_data = _build_destination_form_data(request.form)
 
     if request.method == "POST":
+        action = str(request.form.get("action", "create")).strip().lower()
+        try:
+            destination_id = int(request.form.get("destination_id", "0"))
+        except ValueError:
+            destination_id = 0
+        if action == "update":
+            edit_destination = Destination.query.get(destination_id)
+            if not edit_destination:
+                flash(_ui_text("تعذر العثور على الوجهة المطلوبة.", "The requested destination could not be found.", lang), "danger")
+                return redirect(url_for("main.admin_destinations", lang=lang))
+
         parsed = _validate_destination_form(form_data, cities)
+        uploaded_image = request.files.get("image_file")
+        resolved_image_url = parsed["image_url"] or None
+        if uploaded_image and uploaded_image.filename:
+            resolved_image_url, image_error = _save_destination_image(uploaded_image)
+            if image_error:
+                parsed["errors"].append(image_error)
         for error in parsed["errors"]:
             flash(_ui_text(error[0], error[1], lang), "danger")
-        if not parsed["errors"]:
-            destination = Destination(
-                name=parsed["name"],
-                city=parsed["city"],
-                category=parsed["category"],
-                description=parsed["description"],
-                estimated_cost=parsed["estimated_cost"],
-                latitude=parsed["latitude"],
-                longitude=parsed["longitude"],
-                season=parsed["season"],
+        if parsed["errors"]:
+            destinations = Destination.query.order_by(Destination.created_at.desc()).all()
+            return render_template(
+                "admin_destinations.html",
+                destinations=destinations,
+                form_data=form_data,
+                cities=cities,
+                seasons=DESTINATION_SEASONS,
+                edit_destination=edit_destination,
+                dashboard_stats={
+                    "destinations": Destination.query.count(),
+                    "attractions": Attraction.query.count(),
+                    "users": User.query.count(),
+                    "reviews": Review.query.count(),
+                },
             )
-            db.session.add(destination)
+
+        if action == "update" and edit_destination:
+            edit_destination.name = parsed["name"]
+            edit_destination.city = parsed["city"]
+            edit_destination.category = parsed["category"]
+            edit_destination.description = parsed["description"]
+            edit_destination.image_url = resolved_image_url if resolved_image_url is not None else edit_destination.image_url
+            edit_destination.estimated_cost = parsed["estimated_cost"]
+            edit_destination.latitude = parsed["latitude"]
+            edit_destination.longitude = parsed["longitude"]
+            edit_destination.season = parsed["season"]
             db.session.commit()
-            flash(_ui_text("تمت إضافة الوجهة بنجاح.", "Destination added successfully.", lang), "success")
+            flash(_ui_text("تم تحديث الوجهة بنجاح.", "Destination updated successfully.", lang), "success")
             return redirect(url_for("main.admin_destinations", lang=lang))
+
+        destination = Destination(
+            name=parsed["name"],
+            city=parsed["city"],
+            category=parsed["category"],
+            description=parsed["description"],
+            image_url=resolved_image_url,
+            estimated_cost=parsed["estimated_cost"],
+            latitude=parsed["latitude"],
+            longitude=parsed["longitude"],
+            season=parsed["season"],
+        )
+        db.session.add(destination)
+        db.session.commit()
+        flash(_ui_text("تمت إضافة الوجهة بنجاح.", "Destination added successfully.", lang), "success")
+        return redirect(url_for("main.admin_destinations", lang=lang))
 
     destinations = Destination.query.order_by(Destination.created_at.desc()).all()
     return render_template(
@@ -479,6 +587,7 @@ def admin_destinations():
         form_data=form_data,
         cities=cities,
         seasons=DESTINATION_SEASONS,
+        edit_destination=edit_destination,
         dashboard_stats={
             "destinations": Destination.query.count(),
             "attractions": Attraction.query.count(),
@@ -486,6 +595,18 @@ def admin_destinations():
             "reviews": Review.query.count(),
         },
     )
+
+
+@main_bp.route("/admin/destinations/<int:destination_id>/delete", methods=["POST"])
+@login_required
+def delete_admin_destination(destination_id):
+    _require_admin()
+    lang = _get_ui_lang()
+    destination = Destination.query.get_or_404(destination_id)
+    db.session.delete(destination)
+    db.session.commit()
+    flash(_ui_text("تم حذف الوجهة بنجاح.", "Destination deleted successfully.", lang), "info")
+    return redirect(url_for("main.admin_destinations", lang=lang))
 
 
 @main_bp.route("/admin", methods=["GET"])
@@ -962,3 +1083,4 @@ def map_screen():
         city=city,
         map_destinations=map_destinations,
     )
+
